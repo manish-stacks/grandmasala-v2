@@ -1,0 +1,16 @@
+PORT=4000
+JWT_SECRET=qwertyuio0oplkjnhbgvfcdxsdfergvdfsgrvt
+SMPT_HOST=smtp.gmail.com
+SMPT_PORT=465
+SMPT_MAIL=gasalahoe@gmail.com
+SMPT_MAIL=gasalahoe@gmail.com
+SMPT_PASS=vqlm buqn gifm wloi
+
+CLOUDINARY_CLOUD_NAME=do34gd7bu                                                                                     
+CLOUDINARY_API_KEY=658284914137226                                                                                     
+CLOUDINARY_API_SECRET=MfABahlFqPWadh1EqS33JlgHicQ
+
+MONGO_DB_URL=mongodb+srv://hbsdevelopersteam:3sLhkX2L8DlxPPw9@cluster.htzkptu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster
+REDIS_HOST=
+REDIS_PORT=6379
+REDIRECT_URL=

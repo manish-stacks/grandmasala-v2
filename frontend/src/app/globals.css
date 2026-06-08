@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Grand Masala Brand Colors */
+:root {
+  --brand-red: #81190B;
+  --brand-red-dark: #5a1008;
+  --brand-cream: #F4F1EA;
+  --brand-gold: #D4A017;
+}
+
+/* Marquee animation (same as original) */
+.main-container__marquee {
+  overflow: hidden;
+  width: 100%;
+}
+.main-container__marquee-track {
+  display: flex;
+  animation: marquee 20s linear infinite;
+}
+.main-container__marquee-items {
+  display: flex;
+  gap: 3rem;
+  white-space: nowrap;
+  padding-right: 3rem;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Slick carousel fixes */
+.slick-track { display: flex !important; }
+.slick-slide { height: inherit !important; }
+.slick-slide > div { height: 100%; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f4f1ea; }
+::-webkit-scrollbar-thumb { background: #81190B; border-radius: 3px; }
+
+/* Cart Sidebar slide-in animation */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Checkout Modal fade-in */
+@keyframes fade-in-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease forwards;
+}
