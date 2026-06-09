@@ -5,6 +5,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'api.grandmasala.in' },
       { protocol: 'https', hostname: 'grandmasala.in' },
+      { protocol: 'https', hostname: 'someindiangirl.com' },
       {
         protocol: 'http',
         hostname: 'localhost',

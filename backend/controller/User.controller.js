@@ -166,35 +166,35 @@ exports.RegisterUser = async (req, res) => {
 };
 
 exports.RegisterUserBeforeLogin = async (req, res) => {
-  const { Email, ContactNumber } = req.body;
+  const { ContactNumber, Email } = req.body;
 
-  if (!Email || !ContactNumber) {
+  if (!ContactNumber) {
     return res.status(400).json({
       success: false,
-      message: "Email and Contact Number are required",
+      message: "Contact Number is required",
     });
   }
 
   try {
+    let user = await User.findOne({ ContactNumber });
 
-    const user = await User.findOneAndUpdate(
-      { $or: [{ Email }, { ContactNumber }] },
-      {
-        $setOnInsert: {
-          Name: "Guest",
-          Email,
-          Password: ContactNumber,
-          ContactNumber,
-          Role: "User",
-          isActive: true
-        },
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      }
-    );
+    if (!user) {
+      user = await User.create({
+        Name: "Guest",
+        Email: Email || null,
+        Password: ContactNumber,
+        ContactNumber,
+        Role: "User",
+        isActive: true,
+      });
+    } else if (Email && !user.Email) {
+      // existing user ka email nahi hai to save karo
+      user = await User.findByIdAndUpdate(
+        user._id,
+        { Email },
+        { new: true }
+      );
+    }
 
     return sendToken(user, res, 200, "Login successful");
   } catch (error) {
@@ -889,11 +889,11 @@ exports.sendLoginOtp = async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "Is email/number se koi account nahi mila. Pehle register karo." });
+      return res.status(404).json({ success: false, message: "User not found with this email or mobile number" });
     }
 
     if (!user.isActive) {
-      return res.status(401).json({ success: false, message: "Aapka account block hai. Support se contact karo." });
+      return res.status(401).json({ success: false, message: "Your account is blocked" });
     }
 
     // Generate OTP
@@ -909,7 +909,7 @@ exports.sendLoginOtp = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "OTP aapki email pe bhej diya gaya",
+      message: "OTP sent successfully. Please check your email.",
       email: user.Email,  // IMPORTANT: frontend ko yahi chahiye
     });
   } catch (error) {

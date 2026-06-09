@@ -7,8 +7,12 @@ exports.createCoupon = async (req, res) => {
         const { code, discount, minimumOrderAmount, expirationDate } = req.body;
         console.log(req.body)
         // Validation
-        if (!code || !discount || !minimumOrderAmount || !expirationDate) {
-            return res.status(400).json({ message: 'All fields are required.' });
+        // if (!code || !discount || !minimumOrderAmount) {
+        //     return res.status(400).json({ message: 'All fields are required.' });
+        // }
+
+        if (expirationDate && moment(expirationDate).isBefore(moment())) {
+            return res.status(400).json({ message: 'Expiration date cannot be in the past.' });
         }
 
         // Ensure expirationDate is a valid date

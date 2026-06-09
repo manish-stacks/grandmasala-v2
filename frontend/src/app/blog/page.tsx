@@ -35,6 +35,7 @@ export const blogsData = [
 
 export default async function BlogsPage() {
   const data = await serverFetch<any>('/blog');
+  console.log('Fetched blogs data:', data);
   const blogs = data?.blogs || blogsData;
 
   return (
@@ -44,11 +45,11 @@ export default async function BlogsPage() {
         <p className="text-white/80">Spice guides, recipes, and health benefits</p>
       </div>
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {blogsData.length === 0 ? (
-          <p className="text-center text-gray-500 py-16">No blogsData yet. Check back soon!</p>
+        {blogs.length === 0 ? (
+          <p className="text-center text-gray-500 py-16">No blogs yet. Check back soon!</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogsData.map((blog: any) => (
+            {blogs.map((blog: any) => (
               <article key={blog._id} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 {blog.imageUrl && (
                   <div className="h-48 relative overflow-hidden">

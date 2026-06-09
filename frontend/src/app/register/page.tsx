@@ -55,7 +55,7 @@ export default function RegisterPage() {
       setStep('otp');
       setResendTimer(60);
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
-      toast.success('OTP bhej diya gaya aapki email pe!');
+      toast.success('OTP sent successfully. Please check your email.');
     } catch {
       toast.error('Server error. Try again.');
     } finally {
@@ -94,7 +94,7 @@ export default function RegisterPage() {
         return;
       }
       if (data.token) sessionStorage.setItem('token_login', data.token);
-      toast.success('Account ready! Welcome to Grand Masala 🌶');
+      toast.success('Registration successful! 🌶');
       router.push('/profile');
     } catch {
       toast.error('Server error');
@@ -114,7 +114,7 @@ export default function RegisterPage() {
       setResendTimer(60);
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
-      toast.success('OTP dobara bhej diya!');
+      toast.success('OTP sent successfully. Please check your email.');
     } catch { toast.error('Resend failed'); }
   };
 
@@ -131,7 +131,7 @@ export default function RegisterPage() {
             {step === 'form' ? 'Create your account' : 'Verify your email'}
           </h1>
           <p className="text-gray-500 text-sm mt-1">
-            {step === 'form' ? 'Grand Masala family mein swagat hai' : `OTP bheja: ${form.Email}`}
+            {step === 'form' ? 'Register to get started' : `OTP sent to: ${form.Email}`}
           </p>
         </div>
 
@@ -148,7 +148,7 @@ export default function RegisterPage() {
                   <input
                     type="text" value={form.Name}
                     onChange={e => setForm(p => ({ ...p, Name: e.target.value }))}
-                    required placeholder="Aapka poora naam"
+                    required placeholder="Enter your full name"
                     className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
                   />
                 </div>
@@ -182,7 +182,7 @@ export default function RegisterPage() {
               </div>
 
               <p className="text-xs text-gray-400 text-center pt-1">
-                Password ki zaroorat nahi — hum OTP se login karenge
+                Password is not required as you will receive an OTP for login. If you want to set a password later, you can do so in your profile settings.
               </p>
 
               <button
@@ -196,8 +196,8 @@ export default function RegisterPage() {
               </button>
 
               <p className="text-center text-sm text-gray-500">
-                Pehle se account hai?{' '}
-                <Link href="/login" className="text-[#81190B] font-semibold hover:underline">Login karo</Link>
+                Already have an account?{' '}
+                <Link href="/login" className="text-[#81190B] font-semibold hover:underline">Login</Link>
               </p>
             </form>
           )}
@@ -207,9 +207,9 @@ export default function RegisterPage() {
             <div className="space-y-6">
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
                 <p className="text-sm text-blue-700">
-                  Verification code bheja: <span className="font-bold">{form.Email}</span>
+                  Verification code sent to: <span className="font-bold">{form.Email}</span>
                 </p>
-                <p className="text-xs text-blue-500 mt-0.5">Inbox ya spam folder check karo</p>
+                <p className="text-xs text-blue-500 mt-0.5">Please check your inbox or spam folder</p>
               </div>
 
               <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
@@ -232,13 +232,13 @@ export default function RegisterPage() {
               <div className="text-center">
                 {resendTimer > 0
                   ? <p className="text-sm text-gray-400">Resend in <span className="font-bold text-gray-600">{resendTimer}s</span></p>
-                  : <button onClick={handleResend} className="text-sm text-[#81190B] font-semibold hover:underline">OTP nahi aaya? Dobara bhejo</button>
+                  : <button onClick={handleResend} className="text-sm text-[#81190B] font-semibold hover:underline">OTP not received? Resend</button>
                 }
               </div>
 
               <button onClick={() => { setStep('form'); setOtp(['','','','','','']); }}
                 className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-500 hover:text-gray-700">
-                <ChevronLeft size={14} /> Wapas jao
+                <ChevronLeft size={14} /> Go Back
               </button>
             </div>
           )}

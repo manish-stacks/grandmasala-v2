@@ -17,6 +17,7 @@ export default function AdminOrders() {
       const token = sessionStorage.getItem('admin_token');
       const res = await fetch(`${API}/admin/get-all-order`, { headers:{ Authorization:`Bearer ${token}` } });
       const data = await res.json();
+      console.log("data",data)
       setOrders(data.orders || []);
     } catch {} finally { setLoading(false); }
   };

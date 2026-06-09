@@ -102,11 +102,12 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
                 </Link>
 
                 <div className="p-5">
-
+                    <Link href={`/product/${product._id}`}>
                   {/* Product Name */}
                   <h3 className="font-bold text-lg text-[#81190B] line-clamp-2 min-h-[56px]">
                     {product.product_name}
                   </h3>
+                  </Link>
 
                   {/* Rating */}
                   <div className="flex items-center gap-1 mt-2">

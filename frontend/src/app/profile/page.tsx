@@ -40,9 +40,10 @@ export default function ProfilePage() {
       fetch(`${API}/my-all-order`,{ headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
       fetch(`${API}/wishlist`,    { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
     ]).then(([u, o, w]) => {
+      console.log('w:',w);
       setUser(u.data || {});
       setEditForm({ Name: u.data?.Name || '', ContactNumber: u.data?.ContactNumber || '' });
-      setOrders(o.orders || []);
+      setOrders(o.order || []);
       setWishlist(w.wishlist || w.data || []);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [router]);
@@ -80,7 +81,7 @@ export default function ProfilePage() {
     { id: 'dashboard', label: 'Dashboard',     icon: LayoutDashboard },
     { id: 'profile',   label: 'My Profile',    icon: User },
     { id: 'addresses', label: 'Addresses',     icon: MapPin },
-    { id: 'wishlist',  label: 'Wishlist',      icon: Heart },
+    // { id: 'wishlist',  label: 'Wishlist',      icon: Heart },
     { id: 'orders',    label: 'Order History', icon: ShoppingBag },
   ];
 
@@ -91,7 +92,7 @@ export default function ProfilePage() {
 
           {/* ── Sidebar ── */}
           <aside className="lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm">
               {/* User card */}
               <div className="p-5 flex items-center gap-3 border-b border-gray-100">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#A75F55] to-[#A75F55] rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
@@ -139,12 +140,12 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {[
                     { label: 'Total Orders', value: orders.length, icon: ShoppingBag, color: 'text-purple-500 bg-purple-50' },
                     { label: 'Total Spent', value: `₹${totalSpent.toLocaleString('en-IN')}`, icon: TrendingUp, color: 'text-teal-500 bg-teal-50' },
                     { label: 'Pending Orders', value: pendingOrders, icon: Clock, color: 'text-amber-500 bg-amber-50' },
-                    { label: 'Wishlist', value: wishlist.length, icon: Heart, color: 'text-pink-500 bg-pink-50' },
+                    // { label: 'Wishlist', value: wishlist.length, icon: Heart, color: 'text-pink-500 bg-pink-50' },
                   ].map(stat => (
                     <div key={stat.label} className="bg-white rounded-2xl shadow-sm p-5">
                       <div className={`w-10 h-10 rounded-xl ${stat.color} flex items-center justify-center mb-3`}>
@@ -159,12 +160,12 @@ export default function ProfilePage() {
                 {/* Quick actions */}
                 <div className="bg-white rounded-2xl shadow-sm p-5">
                   <h3 className="font-bold text-gray-900 mb-4">Quick Actions</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {[
                       { label: 'Edit Profile', icon: User, color: 'bg-blue-50 text-blue-500', tab: 'profile' as TabId },
                       { label: 'Addresses', icon: MapPin, color: 'bg-green-50 text-green-500', tab: 'addresses' as TabId },
                       { label: 'My Orders', icon: ShoppingBag, color: 'bg-purple-50 text-purple-500', tab: 'orders' as TabId },
-                      { label: 'Wishlist', icon: Heart, color: 'bg-pink-50 text-pink-500', tab: 'wishlist' as TabId },
+                      // { label: 'Wishlist', icon: Heart, color: 'bg-pink-50 text-pink-500', tab: 'wishlist' as TabId },
                     ].map(action => (
                       <button key={action.label} onClick={() => setTab(action.tab)}
                         className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-100 hover:border-gray-200 transition-colors">

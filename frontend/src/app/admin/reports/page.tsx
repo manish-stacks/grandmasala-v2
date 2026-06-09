@@ -16,6 +16,7 @@ export default function AdminReports() {
       const token = sessionStorage.getItem('admin_token');
       const res = await fetch(`${API}/get-reports`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body:JSON.stringify({ dateFrom, dateTo }) });
       const data = await res.json();
+      console.log("Report", data);
       if (data.success || res.ok) setReport(data);
       else toast.error('Failed to generate report');
     } catch { toast.error('Something went wrong'); } finally { setLoading(false); }

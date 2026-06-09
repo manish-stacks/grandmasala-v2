@@ -5,10 +5,7 @@ const announcementSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    status: {
-        type: Boolean,
-      
-    }
+   status: { type: Boolean, default: true }
 });
 
 const Announcement = mongoose.model('Announcement', announcementSchema);

@@ -63,7 +63,10 @@ export default function CreateProduct() {
       const token = sessionStorage.getItem('admin_token');
       const fd = new FormData();
       images.forEach(img => fd.append('images', img));
-      Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+      Object.entries(form).forEach(([k, v]) => {
+  if (k === 'sub_category' && !v) return; // empty hone pe append mat karo
+  fd.append(k, String(v));
+});
       fd.set('Varient', JSON.stringify(variants));
       const res = await fetch(`${API}/add-new-product`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
       const data = await res.json();

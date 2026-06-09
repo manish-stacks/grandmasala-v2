@@ -38,13 +38,13 @@ export default function LoginPage() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const val = identifier.trim();
-    if (!val) { toast.error('Email ya mobile number daalo'); return; }
+    if (!val) { toast.error('Email or mobile number required'); return; }
 
     // Validate format
     const isPhone = /^[0-9]{10}$/.test(val);
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
     if (!isPhone && !isEmail) {
-      toast.error('Valid email ya 10-digit mobile number daalo');
+      toast.error('Valid email or 10-digit mobile number required');
       return;
     }
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!data.success) {
-        toast.error(data.message || 'OTP send karne mein problem aayi');
+        toast.error(data.message || 'Error sending OTP. Try again.');
         return;
       }
       setResolvedEmail(data.email); // backend returns the email to verify against
@@ -66,7 +66,7 @@ export default function LoginPage() {
       // Focus first OTP box
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
     } catch {
-      toast.error('Server se connect nahi ho pa raha. Try again.');
+      toast.error('Server error. Try again.');
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export default function LoginPage() {
   // ── Step 2: Verify OTP ────────────────────────────────────
   const handleVerifyOtp = async () => {
     const code = otp.join('');
-    if (code.length < 6) { toast.error('6-digit OTP poora bharo'); return; }
+    if (code.length < 6) { toast.error('6-digit OTP required'); return; }
     setOtpLoading(true);
     try {
       const res = await fetch(`${API}/verify-login-otp`, {
@@ -108,13 +108,13 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (!data.token && !data.success) {
-        toast.error(data.message || 'Invalid OTP. Dobara try karo.');
+        toast.error(data.message || 'Invalid OTP. Try again.');
         return;
       }
       if (data.token) {
         sessionStorage.setItem('token_login', data.token);
       }
-      toast.success('Login ho gaye! 🎉');
+      toast.success('Login successful! 🎉');
       router.push('/profile');
     } catch {
       toast.error('Server error. Try again.');
@@ -137,7 +137,7 @@ export default function LoginPage() {
         setResendTimer(60);
         setOtp(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
-        toast.success('OTP dobara bhej diya!');
+        toast.success('OTP sent again!');
       } else {
         toast.error(data.message);
       }
@@ -162,8 +162,8 @@ export default function LoginPage() {
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             {step === 'identifier'
-              ? 'Email ya mobile number se login karo'
-              : `OTP bheja gaya: ${resolvedEmail}`}
+              ? 'Login with your email or phone number. No password needed!'
+              : `OTP sent to: ${resolvedEmail}`}
           </p>
         </div>
 
@@ -174,7 +174,7 @@ export default function LoginPage() {
             <form onSubmit={handleSendOtp} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email ya Mobile Number
+                  Email or Mobile Number
                 </label>
                 <div className="relative">
                   {isPhone
@@ -185,13 +185,13 @@ export default function LoginPage() {
                     type="text"
                     value={identifier}
                     onChange={e => setIdentifier(e.target.value)}
-                    placeholder="yourname@email.com ya 9876543210"
+                    placeholder="yourname@email.com or 9876543210"
                     autoFocus
                     className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3.5 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
                   />
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
-                  Koi password nahi chahiye — hum OTP se verify karenge
+                  No password needed — we'll verify you with an OTP
                 </p>
               </div>
 
@@ -207,9 +207,9 @@ export default function LoginPage() {
               </button>
 
               <p className="text-center text-sm text-gray-500">
-                Naya account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/register" className="text-[#81190B] font-semibold hover:underline">
-                  Register karo
+                  Register
                 </Link>
               </p>
             </form>
@@ -221,9 +221,9 @@ export default function LoginPage() {
               {/* Sent-to info */}
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-center">
                 <p className="text-sm text-blue-700">
-                  OTP bheja gaya: <span className="font-bold">{resolvedEmail}</span>
+                  OTP sent to: <span className="font-bold">{resolvedEmail}</span>
                 </p>
-                <p className="text-xs text-blue-500 mt-0.5">Inbox check karo (spam bhi)</p>
+                <p className="text-xs text-blue-500 mt-0.5">Please check your inbox or spam folder</p>
               </div>
 
               {/* 6-box OTP input */}
@@ -271,7 +271,7 @@ export default function LoginPage() {
                     onClick={handleResend}
                     className="text-sm text-[#81190B] font-semibold hover:underline"
                   >
-                    OTP nahi aaya? Dobara bhejo
+                    OTP not received? Resend
                   </button>
                 )}
               </div>
@@ -284,7 +284,7 @@ export default function LoginPage() {
                 }}
                 className="w-full flex items-center justify-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
               >
-                <ChevronLeft size={14} /> Wapas jao
+                <ChevronLeft size={14} /> Go Back
               </button>
             </div>
           )}

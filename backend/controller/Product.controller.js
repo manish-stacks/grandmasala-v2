@@ -40,7 +40,7 @@ const uploadBufferToCloudinary = (buffer, fileName) => {
 
 exports.createProduct = async (req, res) => {
 
-    
+
     try {
         const {
             product_name,
@@ -89,7 +89,7 @@ exports.createProduct = async (req, res) => {
         // Parse color string into array (frontend sends comma-separated string)
         const parsedColors = color ? color.split(',').map(c => c.trim()).filter(Boolean) : [];
 
-        const categoriesChile = sub_category === null ? null : sub_category;
+        const categoriesChile = sub_category && sub_category !== '' ? sub_category : null;
 
         // Construct product data
         const productData = {
@@ -326,7 +326,9 @@ exports.updateProduct = async (req, res) => {
         if (category !== undefined) updateFields.category = category;
         if (extra_description !== undefined) updateFields.extra_description = extra_description;
         if (tag !== undefined) updateFields.tag = tag;
-        if (sub_category !== undefined) updateFields.sub_category = sub_category;
+        if (sub_category !== undefined) {
+            updateFields.sub_category = sub_category && sub_category !== '' ? sub_category : null;
+        }
 
         // ✅ Handle color parsing - consistent with create controller
         if (color !== undefined) {
@@ -372,7 +374,7 @@ exports.updateProduct = async (req, res) => {
         // ✅ Handle file uploads
         if (req.files && req.files.length > 0) {
             console.log("Processing file uploads:", req.files.length);
-            
+
             for (const file of req.files) {
                 const result = await uploadBufferToCloudinary(file.buffer, file.originalname);
                 console.log(`Uploaded ${file.fieldname}:`, result.secure_url);
@@ -452,7 +454,7 @@ exports.updateProduct = async (req, res) => {
 exports.search_product_and_filter = async (req, res) => {
     try {
         const { query, page = 1 } = req.query;
-        const perPage = 10; 
+        const perPage = 10;
         let filter = {};
 
         if (query) {
