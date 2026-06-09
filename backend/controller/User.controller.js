@@ -139,12 +139,24 @@ exports.RegisterUser = async (req, res) => {
     console.log("✅ New User Saved Successfully");
 
     console.log("➡ Adding Register OTP to Queue:", Generate_otp);
-    await EmailQueue.add({
+    const job = await EmailQueue.add({
       user_id: newUser._id,
       mail_type: "register",
       otp: Generate_otp,
     });
 
+    console.log("Job Added:", job.id);
+    console.log("✅ Job Added:", job.id);
+
+    setTimeout(async () => {
+      const updatedJob = await EmailQueue.getJob(job.id);
+
+      console.log("Job State:", await updatedJob.getState());
+
+      console.log("Failed Reason:", updatedJob.failedReason);
+
+      console.log("Progress:", updatedJob.progress());
+    }, 5000);
     return res.status(200).json({
       success: true,
       message:
