@@ -287,7 +287,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 setToken(data.token);
 setUser(data.login || {});
 setAddingNew(true); // ✅ new user — seedha form
-setAddrForm((p) => ({ ...p, name: data.login?.Name || "" }));
+setAddrForm((p) => ({ ...p, name: "" }));
 setStep("address");
 setError("");
     } catch {
@@ -626,13 +626,13 @@ setError("");
           } else {
             // ✅ No saved address — seedha form open karo
             setAddingNew(true);
-            setAddrForm((p) => ({ ...p, name: u?.Name || "" }));
+            setAddrForm((p) => ({ ...p, name: "" }));
           }
         })
         .catch(() => {
           // ✅ API fail bhi ho to form open karo
           setAddingNew(true);
-          setAddrForm((p) => ({ ...p, name: u?.Name || "" }));
+          setAddrForm((p) => ({ ...p, name: "" }));
         });
     })
     .catch(() => {});
@@ -741,7 +741,7 @@ setError("");
               {step === "address" && (
                 <div className="space-y-4">
                   {/* User badge */}
-                  {user && (
+                  {/* {user && (
                     <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
                       <div className="w-8 h-8 bg-[#81190B] rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {(user.Name || "U")[0].toUpperCase()}
@@ -759,7 +759,7 @@ setError("");
                         className="text-green-500 flex-shrink-0"
                       />
                     </div>
-                  )}
+                  )} */}
 
                   {/* Coupon */}
                   <div>
@@ -848,7 +848,7 @@ setError("");
                           onClick={() => {
                             setAddingNew(true);
                             setAddrForm({
-                              name: user?.Name || "",
+                              name: "",
                               addressLine: "",
                               city: "",
                               state: "",
