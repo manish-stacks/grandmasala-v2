@@ -2,7 +2,7 @@ const Product = require('../models/Product.model');
 const Blog = require('../models/BlogModel');
 const Page = require('../models/Pages.');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://grandmasala.in';
 
 exports.getSitemap = async (req, res) => {
     try {

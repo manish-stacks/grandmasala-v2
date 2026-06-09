@@ -62,8 +62,8 @@ npm run dev
 
 ## Environment Variables (.env.local)
 ```
-NEXT_PUBLIC_API_URL=http://localhost:7500/api/v1
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=https://api.grandmasala.in/api/v1
+NEXT_PUBLIC_SITE_URL=https://grandmasala.in
 NEXT_PUBLIC_RAZORPAY_KEY=rzp_live_xxx
 ```
 

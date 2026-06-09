@@ -6,7 +6,7 @@ class PaymentService {
         this.baseUrl = 'https://api-preprod.phonepe.com/apis/pg-sandbox';
         this.merchantId = process.env.PHONEPE_MERCHANT_ID || 'TESTPGPAYCREDUAT';
         this.merchantKey = process.env.PHONEPE_MERCHANT_KEY || '14d6df8a-75bf-4873-9adf-43bc1545094f';
-        this.redirectUrl = process.env.REDIRECT_URL || 'http://localhost:7500/payment-response';
+        this.redirectUrl = process.env.REDIRECT_URL || 'https://api.grandmasala.in/payment-response';
     }
 
     async initiatePayment(paymentDetails) {
@@ -23,7 +23,7 @@ class PaymentService {
                 merchantUserId: merchantUserId,
                 name: "User",
                 amount: paymentDetails?.totalPrice * 100 || 52000, // Amount in Paise
-                callbackUrl: paymentDetails?.callbackUrl || 'http://localhost:7500/api/v1/check-payment',
+                callbackUrl: paymentDetails?.callbackUrl || 'https://api.grandmasala.in/api/v1/check-payment',
                 redirectUrl: `${this.redirectUrl}/${transactionId}`,
                 redirectMode: 'POST',
                 paymentInstrument: {

@@ -18,10 +18,10 @@ const port = process.env.PORT || 7500;
 // CORS Config
 // ─────────────────────────────────────────────
 const allowedOrigins = [
-    "http://localhost:3000",
+    "https://grandmasala.in",
     "http://localhost:5173",
     "https://grandmasala.in",
-    "http://localhost:3000",
+    "https://grandmasala.in",
     "https://admin.grandmasala.in",
     "https://www.admin.grandmasala.in",
 ];

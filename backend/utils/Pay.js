@@ -20,8 +20,8 @@ async function initiatePayment(req, res, order) {
       merchantUserId: merchantUserId,
       name: "User",
       amount: totalAmount * 100,
-      callbackUrl: 'http://localhost:7500/payment-failed',
-      redirectUrl: `http://localhost:7500/api/v1/verify-payment/${transactionId}`,
+      callbackUrl: 'https://api.grandmasala.in/payment-failed',
+      redirectUrl: `https://api.grandmasala.in/api/v1/verify-payment/${transactionId}`,
       redirectMode: 'POST',
       paymentInstrument: {
         type: 'PAY_PAGE',

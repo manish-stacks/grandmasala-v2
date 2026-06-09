@@ -12,7 +12,7 @@ npm start              # Production
 ```
 
 ## API Base URL
-`http://localhost:7500/api/v1`
+`https://api.grandmasala.in/api/v1`
 
 ## Key Endpoints
 
