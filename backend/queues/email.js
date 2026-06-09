@@ -4,7 +4,7 @@ const OrderModel = require('../models/Order.model');
 const sendEmail = require('../utils/sendMail');
 
 // Initialize Bull queue
-const EmailQueue = new Bull('Email_Sending', {
+const EmailQueue = new Bull('GrandMasala_Email_Sending', {
     redis: { host: '127.0.0.1', port: 6379 },
     defaultJobOptions: {
         attempts: 3,
