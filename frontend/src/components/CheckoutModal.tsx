@@ -284,10 +284,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         return;
       }
       sessionStorage.setItem("token_login", data.token);
-      setToken(data.token);
-      setUser(data.login || {});
-      setStep("address");
-      setError("");
+setToken(data.token);
+setUser(data.login || {});
+setAddingNew(true); // ✅ new user — seedha form
+setAddrForm((p) => ({ ...p, name: data.login?.Name || "" }));
+setStep("address");
+setError("");
     } catch {
       setError("Could not connect to server");
     } finally {
@@ -388,7 +390,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       return;
     }
 
-    if(!addrForm.email){
+    if (!addrForm.email) {
       setError("Email is required to proceed");
     }
 
@@ -579,6 +581,64 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       setPlacing(false);
     }
   };
+
+  useEffect(() => {
+  document.body.style.overflow = "hidden";
+
+  fetch(`${API}/settings`)
+    .then((r) => r.json())
+    .then((d) => {
+      if (d.data?.freeShippingThreshold) setFreeThreshold(d.data.freeShippingThreshold);
+      if (d.data?.shippingCost) setShippingCost(d.data.shippingCost);
+    })
+    .catch(() => {})
+    .finally(() => setSettingsLoaded(true));
+
+  const t = sessionStorage.getItem("token_login");
+  if (!t) return;
+  setToken(t);
+
+  fetch(`${API}/my-details`, { headers: { Authorization: `Bearer ${t}` } })
+    .then((r) => r.json())
+    .then((d) => {
+      if (!d.data) return;
+      const u = d.data;
+      setUser(u);
+      setStep("address");
+      setAlreadyLoggedIn(true);
+
+      fetch(`${API}/my-last-order`, { headers: { Authorization: `Bearer ${t}` } })
+        .then((r) => r.json())
+        .then((od) => {
+          if (od.order?.shipping) {
+            const s = od.order.shipping;
+            const addr = {
+              name: s.name,
+              addressLine: s.addressLine,
+              city: s.city,
+              state: s.state,
+              postCode: s.postCode,
+              addressType: s.addressType || "Home",
+              mobile: s.mobileNumber || String(u.ContactNumber || ""),
+            };
+            setSavedAddr(addr);
+            setSelectedAddr(addr);
+          } else {
+            // ✅ No saved address — seedha form open karo
+            setAddingNew(true);
+            setAddrForm((p) => ({ ...p, name: u?.Name || "" }));
+          }
+        })
+        .catch(() => {
+          // ✅ API fail bhi ho to form open karo
+          setAddingNew(true);
+          setAddrForm((p) => ({ ...p, name: u?.Name || "" }));
+        });
+    })
+    .catch(() => {});
+
+  return () => { document.body.style.overflow = ""; };
+}, []);
 
   // ─────────────────────────────────────────────────────────────
   // RENDER
@@ -939,28 +999,32 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     )}
                   </div>
 
-                  
-
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail
-                        size={14}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type="email"
-                        value={addrForm.email || ""}
-                        onChange={(e) =>
-                          setAddrForm((p) => ({ ...p, email: e.target.value }))
-                        }
-                        placeholder="yourname@email.com"
-                        className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
-                      />
+                  {/* Email Address — sirf tab show karo jab user ka email nahi hai */}
+                  {!user?.Email && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail
+                          size={14}
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                        <input
+                          type="email"
+                          value={addrForm.email || ""}
+                          onChange={(e) =>
+                            setAddrForm((p) => ({
+                              ...p,
+                              email: e.target.value,
+                            }))
+                          }
+                          placeholder="yourname@email.com"
+                          className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
