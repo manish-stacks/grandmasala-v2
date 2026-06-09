@@ -1,12 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { CheckCircle, Package, Truck, Phone, Mail, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 function fmt(n: any) { try { return new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR' }).format(n); } catch { return '₹'+(n??0); } }
 
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -66,5 +66,17 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#81190B]"/>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }

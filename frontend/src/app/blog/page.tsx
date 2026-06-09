@@ -9,34 +9,9 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/blog` },
 };
 
-export const blogsData = [
-    {
-      id: 1,
-      title: " The Magic of Turmeric",
-      subtitle: "Discover the golden spice that heals and flavors.",
-      imageUrl: "/images/blog/hldi.jpg",
-      category: "Spices & Health"
-    },
-    {
-      id: 2,
-      title: "Cinnamon Secrets",
-      subtitle: "Why this sweet spice is loved worldwide.",
-      imageUrl: "/images/blog/right.png",
-      category: "Flavors & Wellness"
-    },
-    {
-      id: 3,
-      title: "Red Chili Power",
-      subtitle: "The fiery spice that adds heat to every dish.",
-      imageUrl: "/images/blog/chilli.jpeg",
-      category: "Spice Culture"
-    }
-  ];
-
 export default async function BlogsPage() {
   const data = await serverFetch<any>('/blog');
-  console.log('Fetched blogs data:', data);
-  const blogs = data?.blogs || blogsData;
+  const blogs = data?.blogs || [];
 
   return (
     <div className="min-h-screen bg-[#F4F1EA]">

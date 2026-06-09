@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { serverFetch, SITE_URL } from '@/lib/api';
 import ShopClient from './ShopClient';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Shop All Spices — Grand Masala',
@@ -14,5 +15,13 @@ export default async function ShopPage() {
     serverFetch<any>('/get-product'),
     serverFetch<any>('/admin/category'),
   ]);
-  return <ShopClient initialProducts={productsData?.products || []} initialCategories={categoriesData?.categories || []} />;
+  return (
+    <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#81190B]"/>
+          </div>
+        }>
+          <ShopClient initialProducts={productsData?.products || []} initialCategories={categoriesData?.categories || []} />
+        </Suspense>
+  )
 }

@@ -556,7 +556,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
           },
           prefill: {
             name: user?.Name || addr.name,
-            email: user?.Email || resolvedEmail,
+            email: user?.Email,
             contact: String(user?.ContactNumber || addr.mobile || ""),
           },
           theme: { color: "#81190B" },
