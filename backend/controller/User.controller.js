@@ -169,10 +169,7 @@ exports.RegisterUserBeforeLogin = async (req, res) => {
   const { ContactNumber, Email } = req.body;
 
   if (!ContactNumber) {
-    return res.status(400).json({
-      success: false,
-      message: "Contact Number is required",
-    });
+    return res.status(400).json({ success: false, message: "Contact Number is required" });
   }
 
   try {
@@ -181,28 +178,20 @@ exports.RegisterUserBeforeLogin = async (req, res) => {
     if (!user) {
       user = await User.create({
         Name: "Guest",
-        Email: Email || null,
+        Email: Email || undefined, // ← null ki jagah undefined, sparse index skip karega
         Password: ContactNumber,
         ContactNumber,
         Role: "User",
         isActive: true,
       });
     } else if (Email && !user.Email) {
-      // existing user ka email nahi hai to save karo
-      user = await User.findByIdAndUpdate(
-        user._id,
-        { Email },
-        { new: true }
-      );
+      user = await User.findByIdAndUpdate(user._id, { Email }, { new: true });
     }
 
     return sendToken(user, res, 200, "Login successful");
   } catch (error) {
     console.error("RegisterUserBeforeLogin Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-    });
+    return res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
