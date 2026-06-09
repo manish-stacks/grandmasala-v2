@@ -234,10 +234,20 @@ export default function Footer() {
                     href="https://www.amazon.in/s?k=grand+masala"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors"
+                    className="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-2.5 transition-all group w-fit"
                   >
-                    {/* <span className="text-xl">🛒</span>  */}
-                    Amazon
+                    {/* <svg width="22" height="22" viewBox="0 0 48 48" fill="none"> */}
+                    <span className="text-xl">🛒</span>
+                    {/* </svg> */}
+                    {/* Amazon wordmark */}
+                    <span className="flex flex-col leading-tight">
+                      <span className="text-white font-bold text-sm tracking-wide">
+                        amazon
+                      </span>
+                      <span className="text-[#FF9900] text-[10px] font-semibold tracking-wider">
+                        Shop Now →
+                      </span>
+                    </span>
                   </a>
                 </li>
                 <li>
@@ -245,10 +255,17 @@ export default function Footer() {
                     href="https://blinkit.com/s/?q=grand+masala"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-white hover:text-gray-200 transition-colors"
+                    className="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-2.5 transition-all group w-fit"
                   >
-                    {/* <span className="text-xl">⚡</span>  */}
-                    Blinkit
+                    <span className="text-xl">⚡</span>
+                    <span className="flex flex-col leading-tight">
+                      <span className="text-white font-bold text-sm tracking-wide">
+                        blinkit
+                      </span>
+                      <span className="text-[#F8CB2E] text-[10px] font-semibold tracking-wider">
+                        Quick Delivery →
+                      </span>
+                    </span>
                   </a>
                 </li>
               </ul>
