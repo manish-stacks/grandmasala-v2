@@ -171,7 +171,7 @@ EmailQueue.process(async (job) => {
 
         console.log('➡ Step 3: Building email content...');
         let templateResult;
-
+console.log('mail_type:', mail_type,"user:",user,"otp:",otp);
         if (mail_type === 'orderConfirmOtp') {
             const order = await OrderModel.findOne({ userId: user_id }).sort({ createdAt: -1 });
             if (!order) throw new Error(`Order not found for user ID: ${user_id}`);
@@ -182,6 +182,8 @@ EmailQueue.process(async (job) => {
             }
             templateResult = emailTemplates[mail_type](user, otp);
         }
+
+        console.log("templateResult",templateResult)
 
         const emailOptions = {
             from: `"Grand Masala" <${process.env.SMTP_MAIL}>`,

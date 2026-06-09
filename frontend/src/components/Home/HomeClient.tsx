@@ -21,10 +21,10 @@ export default function HomeClient({ initialProducts, initialBlogs, settings }: 
   return (
     <>
       <Hero />
+      <FeaturedProducts initialProducts={initialProducts} />
       <VideoTestimonial />
       <WhyGrandMasala />
-      <ShopByCategory />
-      <FeaturedProducts initialProducts={initialProducts} />
+      {/* <ShopByCategory /> */}
       <StatsCounter />
       <SpiceQuality />
       <GrandmaMasalaProcess />
