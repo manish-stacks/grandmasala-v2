@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Shop All Spices — Grand Masala',
-  description: 'Shop 100% pure handmade Indian spices — Haldi, Garam Masala, Lal Mirch, Dhania. No preservatives. FSSC 22000 certified. Free delivery above ₹299.',
+  description: 'Shop 100% pure handmade Indian spices — Haldi, Garam Masala, Lal Mirch, Dhania. No preservatives. Free delivery above ₹299.',
   alternates: { canonical: `${SITE_URL}/shop` },
   openGraph: { title: 'Shop Pure Indian Spices — Grand Masala', url: `${SITE_URL}/shop`, images: [`${SITE_URL}/og-image.jpg`] },
 };

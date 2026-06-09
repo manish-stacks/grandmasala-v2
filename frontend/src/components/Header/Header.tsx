@@ -18,7 +18,7 @@ export default function Header() {
   const [announcements, setAnnouncements] = useState([
     "Free delivery on orders above ₹299",
     "100% Natural & Handmade Spices",
-    "FSSC 22000 & ISO Certified",
+    "ISO Certified",
   
   ]);
 

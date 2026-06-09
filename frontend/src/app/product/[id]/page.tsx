@@ -18,7 +18,7 @@ export async function generateMetadata({
     title: `${p.product_name} — Grand Masala`,
     description:
       p.product_description?.slice(0, 160) ||
-      `Buy ${p.product_name} — 100% pure handmade Indian spice. FSSC 22000 certified. Free delivery above ₹299.`,
+      `Buy ${p.product_name} — 100% pure handmade Indian spice. Free delivery above ₹299.`,
     keywords: [
       p.product_name,
       "pure spices",

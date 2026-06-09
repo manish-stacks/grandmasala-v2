@@ -10,6 +10,7 @@ import Testimonials from './Testimonials';
 import VideoTestimonial from './VideoTestimonial';
 import OurStory from './OurStory';
 import GrandmaMasalaProcess from './GrandmaMasalaProcess';
+import WhyGrandMasala from './WhyGrandMasala';
 interface HomeClientProps {
   initialProducts: any[];
   initialBlogs: any[];
@@ -21,6 +22,7 @@ export default function HomeClient({ initialProducts, initialBlogs, settings }: 
     <>
       <Hero />
       <VideoTestimonial />
+      <WhyGrandMasala />
       <ShopByCategory />
       <FeaturedProducts initialProducts={initialProducts} />
       <StatsCounter />

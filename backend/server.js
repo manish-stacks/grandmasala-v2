@@ -19,9 +19,9 @@ const port = process.env.PORT || 7500;
 // ─────────────────────────────────────────────
 const allowedOrigins = [
     "https://grandmasala.in",
+    "https://www.grandmasala.in",
     "http://localhost:5173",
-    "https://grandmasala.in",
-    "https://grandmasala.in",
+    "http://localhost:3014",
     "https://admin.grandmasala.in",
     "https://www.admin.grandmasala.in",
 ];

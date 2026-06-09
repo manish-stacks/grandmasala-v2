@@ -121,7 +121,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-2 text-sm text-gray-600"><Truck size={16} className="text-[#81190B]"/>Free delivery ₹299+</div>
                 <div className="flex items-center gap-2 text-sm text-gray-600"><RotateCcw size={16} className="text-[#81190B]"/>Easy returns</div>
-                <div className="flex items-center gap-2 text-sm text-gray-600"><span>✅</span> FSSC 22000 Certified</div>
+                {/* <div className="flex items-center gap-2 text-sm text-gray-600"><span>✅</span> FSSC 22000 Certified</div> */}
                 <div className="flex items-center gap-2 text-sm text-gray-600"><span>🌿</span> No Preservatives</div>
               </div>
             </div>

@@ -53,9 +53,9 @@ export default function VideoTestimonial() {
     <section className="py-12 bg-[#fff7f0]">
       <div className="max-w-400 mx-auto px-4">
         {/* Heading */}
-        <h2 className="text-3xl lg:text-4xl font-black text-[#81190B] mb-14 text-center">
+        {/* <h2 className="text-3xl lg:text-4xl font-black text-[#81190B] mb-14 text-center">
           Customer Reviews
-        </h2>
+        </h2> */}
 
         {/* Scroll Container */}
         <div className="flex gap-4 overflow-x-auto no-scrollbar">

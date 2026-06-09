@@ -21,13 +21,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const seo = settings?.seo || {};
   const title = seo.metaTitle || 'Grand Masala — 100% Pure Handmade Indian Spices';
-  const desc  = seo.metaDesc  || 'Buy premium handmade Indian spices online. No preservatives, FSSC 22000 certified. Free delivery above ₹299.';
+  const desc  = seo.metaDesc  || 'Buy premium handmade Indian spices online. No preservatives. Free delivery above ₹299.';
   const canonical = seo.canonicalUrl || SITE_URL;
-
+// /logo.png
   return {
     metadataBase: new URL(SITE_URL),
     title: { default: title, template: '%s | Grand Masala' },
     description: desc,
+    icons: {
+  icon: [
+    { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+  ],
+  apple: "/apple-touch-icon.png",
+},
     keywords: seo.metaKeywords ? seo.metaKeywords.split(',').map((k: string) => k.trim()) : ['Indian spices online', 'pure haldi', 'handmade garam masala', 'Grand Masala'],
     authors:   [{ name: 'Grand Masala', url: SITE_URL }],
     creator:   'Grand Masala',

@@ -4,11 +4,11 @@ import HomeClient from '@/components/Home/HomeClient';
 
 export const metadata: Metadata = {
   title: 'Grand Masala — 100% Pure Handmade Indian Spices | Free Delivery ₹299+',
-  description: 'Buy premium handmade Indian spices. Haldi, Garam Masala, Lal Mirch, Dhania — no preservatives, FSSC 22000 certified. Trusted by 10,000+ households.',
+  description: 'Buy premium handmade Indian spices. Haldi, Garam Masala, Lal Mirch, Dhania — no preservatives. Trusted by 10,000+ households.',
   alternates: { canonical: SITE_URL },
   openGraph: {
     title: 'Grand Masala — Pure Handmade Indian Spices',
-    description: 'Premium handmade spices. No preservatives. FSSC 22000 certified. Free delivery on orders above ₹299.',
+    description: 'Premium handmade spices. No preservatives. Free delivery on orders above ₹299.',
     url: SITE_URL,
     images: [{ url: `${SITE_URL}/og-image.jpg`, width: 1200, height: 630 }],
   },
