@@ -701,27 +701,6 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     </div>
                   )}
 
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail
-                        size={14}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-                      />
-                      <input
-                        type="email"
-                        value={addrForm.email || ""}
-                        onChange={(e) =>
-                          setAddrForm((p) => ({ ...p, email: e.target.value }))
-                        }
-                        placeholder="yourname@email.com"
-                        className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
-                      />
-                    </div>
-                  </div>
-
                   {/* Coupon */}
                   <div>
                     <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-2 flex items-center gap-1.5">
@@ -958,6 +937,29 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                         )}
                       </div>
                     )}
+                  </div>
+
+                  
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail
+                        size={14}
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                      />
+                      <input
+                        type="email"
+                        value={addrForm.email || ""}
+                        onChange={(e) =>
+                          setAddrForm((p) => ({ ...p, email: e.target.value }))
+                        }
+                        placeholder="yourname@email.com"
+                        className="w-full border-2 border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-[#81190B] transition-colors"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
