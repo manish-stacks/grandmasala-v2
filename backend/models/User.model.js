@@ -9,6 +9,7 @@ const UserSchema = mongoose.Schema(
         Email: {
             type: String,
             unique: true,
+            sparse: true,
         },
         Password: {
             type: String,
@@ -27,27 +28,27 @@ const UserSchema = mongoose.Schema(
             enum: ["User", "Admin"],
             default: "User",
         },
-        isMobileVerifed:{
+        isMobileVerifed: {
             type: Boolean,
             default: false,
         },
-        
+
         OtpForVerification: {
             type: Number
         },
         ForgetPasswordOtp: {
             type: String
         },
-        ForgetPasswordExpired:{
+        ForgetPasswordExpired: {
             type: Date,
         },
         OtpGeneratedAt: {
             type: Date,
         },
-        tempPassword:{
+        tempPassword: {
             type: String,
             default: null,
-          
+
         }
     },
 
