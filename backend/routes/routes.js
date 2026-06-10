@@ -27,6 +27,7 @@ const {
   getOrderByOrderId, OrderProcessRating, getMyAllOrder,
   getOrderByOrderIdAdmin, generateOrderReport, getRecentsOrders,
   deleteOrder, refundOrder, getCODOrderByOrderId,
+  updateShiprocketDetailsWebhook,
 } = require("../controller/Order_Controller");
 
 const { addSettings, editSettings, getSettings } = require("../controller/Settings");
@@ -106,6 +107,7 @@ router.post("/create_user_from_cart", RegisterUserBeforeLogin);
 router.get("/testconsole", testconsole);
 router.post("/send-login-otp", sendLoginOtp);
 router.post("/verify-login-otp", verifyLoginOtp);
+router.post('/webhook/shiprocket', updateShiprocketDetailsWebhook);
 
 // ─────────────────────────────────────────────
 // NEWSLETTER Routes
