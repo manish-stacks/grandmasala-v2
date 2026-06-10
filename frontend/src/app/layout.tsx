@@ -64,8 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
   const seo = settings?.seo || {};
-  console.log("settings",settings)
-  console.log("seo",seo)
+  // console.log("settings",settings)
+  // console.log("seo",seo)
 
   return (
     <html lang="en">
