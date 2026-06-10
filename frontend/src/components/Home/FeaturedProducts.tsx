@@ -63,6 +63,7 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
             const originalPrice = variant ? variant.price : product.price;
             const rating = (seededRandom(product._id + 'rating') % 2) + 4;
             const reviews = (seededRandom(product._id + 'reviews') % 451) + 50;
+            const disc = variant?.discount_percentage || product.discount || 0;
             return (
               <div
                 key={product._id}
@@ -72,9 +73,9 @@ export default function FeaturedProducts({ initialProducts }: { initialProducts:
                   <div className="relative h-64 bg-[#F4F1EA] overflow-hidden">
 
                     {/* Discount Badge */}
-                    {product.discount > 0 && (
+                    {disc > 0 && (
                       <div className="absolute top-3 left-3 z-20 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                        {product.discount}% OFF
+                        {disc}% OFF
                       </div>
                     )}
 
