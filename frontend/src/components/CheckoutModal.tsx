@@ -196,62 +196,63 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   // ─────────────────────────────────────────────────────────────
   // Init: load settings + check login
   // ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
+  // useEffect(() => {
+  //   document.body.style.overflow = "hidden";
 
-    // Fetch shipping settings from admin
-    fetch(`${API}/settings`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.data?.freeShippingThreshold)
-          setFreeThreshold(d.data.freeShippingThreshold);
-        if (d.data?.shippingCost) setShippingCost(d.data.shippingCost);
-      })
-      .catch(() => {})
-      .finally(() => setSettingsLoaded(true));
+  //   // Fetch shipping settings from admin
+  //   fetch(`${API}/settings`)
+  //     .then((r) => r.json())
+  //     .then((d) => {
+  //       if (d.data?.freeShippingThreshold)
+  //         setFreeThreshold(d.data.freeShippingThreshold);
+  //       if (d.data?.shippingCost) setShippingCost(d.data.shippingCost);
+  //     })
+  //     .catch(() => {})
+  //     .finally(() => setSettingsLoaded(true));
 
-    // Check if user already logged in
-    const t = sessionStorage.getItem("token_login");
-    if (!t) return;
-    setToken(t);
+  //   // Check if user already logged in
+  //   const t = sessionStorage.getItem("token_login");
+  //   if (!t) return;
+  //   setToken(t);
 
-    fetch(`${API}/my-details`, { headers: { Authorization: `Bearer ${t}` } })
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.data) return;
-        const u = d.data;
-        setUser(u);
-        setStep("address"); // skip auth
-        setAlreadyLoggedIn(true);
-        // Load last order address
-        fetch(`${API}/my-last-order`, {
-          headers: { Authorization: `Bearer ${t}` },
-        })
-          .then((r) => r.json())
-          .then((od) => {
-            if (od.order?.shipping) {
-              const s = od.order.shipping;
-              const addr = {
-                name: s.name,
-                addressLine: s.addressLine,
-                city: s.city,
-                state: s.state,
-                postCode: s.postCode,
-                addressType: s.addressType || "Home",
-                mobile: s.mobileNumber || String(u.ContactNumber || ""),
-              };
-              setSavedAddr(addr);
-              setSelectedAddr(addr);
-            }
-          })
-          .catch(() => {});
-      })
-      .catch(() => {});
+  //   fetch(`${API}/my-details`, { headers: { Authorization: `Bearer ${t}` } })
+  //     .then((r) => r.json())
+  //     .then((d) => {
+  //       if (!d.data) return;
+  //       const u = d.data;
+  //       setUser(u);
+  //       setStep("address"); // skip auth
+  //       setAlreadyLoggedIn(true);
+  //       // Load last order address
+  //       fetch(`${API}/my-last-order`, {
+  //         headers: { Authorization: `Bearer ${t}` },
+  //       })
+  //         .then((r) => r.json())
+  //         .then((od) => {
+  //           console.log("Last order details", od);
+  //           if (od.order?.shipping) {
+  //             const s = od.order.shipping;
+  //             const addr = {
+  //               name: s.name,
+  //               addressLine: s.addressLine,
+  //               city: s.city,
+  //               state: s.state,
+  //               postCode: s.postCode,
+  //               addressType: s.addressType || "Home",
+  //               mobile: s.mobileNumber || String(u.ContactNumber || ""),
+  //             };
+  //             setSavedAddr(addr);
+  //             setSelectedAddr(addr);
+  //           }
+  //         })
+  //         .catch(() => {});
+  //     })
+  //     .catch(() => {});
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
+  //   return () => {
+  //     document.body.style.overflow = "";
+  //   };
+  // }, []);
 
   // Resend timer countdown
   // useEffect(() => {
@@ -283,14 +284,39 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         setError(data.message || "Something went wrong");
         return;
       }
-      sessionStorage.setItem("token_login", data.token);
-      setToken(data.token);
+      const tk = data.token;
+      sessionStorage.setItem("token_login", tk);
+      setToken(tk);
       setUser(data.login || {});
-      setAddingNew(true); // ✅ new user — seedha form
-      setAddrForm((p) => ({ ...p, name: "" }));
       setStep("address");
       setError("");
-      setAddrForm((p) => ({ ...p, Email: data.login?.Email || "" }));
+
+      // ✅ Last order check karo — agar address hai to show karo, warna form
+      try {
+        const od = await fetch(`${API}/my-last-order`, {
+          headers: { Authorization: `Bearer ${tk}` },
+        }).then((r) => r.json());
+
+        if (od.order?.shipping) {
+          const s = od.order.shipping;
+          const addr = {
+            name: s.name,
+            addressLine: s.addressLine,
+            city: s.city,
+            state: s.state,
+            postCode: s.postCode,
+            addressType: s.addressType || "Home",
+            mobile: s.mobileNumber || String(data.login?.ContactNumber || ""),
+          };
+          setSavedAddr(addr);
+          setSelectedAddr(addr);
+          setAddingNew(false); // ✅ form mat dikhao
+        } else {
+          setAddingNew(true); // ✅ naya user — form dikhao
+        }
+      } catch {
+        setAddingNew(true);
+      }
     } catch {
       setError("Could not connect to server");
     } finally {
@@ -371,59 +397,77 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   //   }
   // };
 
+  // ── onClose wrapper ──────────────────────────────────────────
+const handleClose = () => {
+  document.body.style.overflow = "";
+  onClose();
+};
+
   // ─────────────────────────────────────────────────────────────
   // ADDRESS handlers
   // ─────────────────────────────────────────────────────────────
   const handleAddrNext = async () => {
-  if (addingNew) {
-    const f = addrForm;
-    if (!f.name || !f.addressLine || !f.city || !f.state || !f.postCode) {
-      setError("Please fill all required fields");
+    if (addingNew) {
+      const f = addrForm;
+      if (!f.name || !f.addressLine || !f.city || !f.state || !f.postCode) {
+        setError("Please fill all required fields");
+        return;
+      }
+      const newAddr = { ...f, mobile: String(user?.ContactNumber || "") };
+      setSavedAddr(newAddr);
+      setSelectedAddr(newAddr);
+      setAddingNew(false);
+
+      // ✅ Email save
+      if (f.email) {
+        const t = token || sessionStorage.getItem("token_login");
+        await fetch(`${API}/create_user_from_cart`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${t}`,
+          },
+          body: JSON.stringify({
+            ContactNumber: String(user?.ContactNumber || ""),
+            Email: f.email,
+          }),
+        }).catch(() => {});
+      }
+
+      setError("");
+      setStep("review");
+      return; // ✅ yahan se hi review pe jao
+    }
+
+    // ── Saved address flow ──
+    if (!selectedAddr) {
+      setError("Please select or add an address");
       return;
     }
-    const newAddr = { ...f, mobile: String(user?.ContactNumber || "") };
-    setSavedAddr(newAddr);
-    setSelectedAddr(newAddr);
-    setAddingNew(false);
 
-    // ✅ Email save
-    if (f.email) {
+    if (!user?.Email && !addrForm.email) {
+      setError("Email is required to proceed");
+      return;
+    }
+
+    if (addrForm.email) {
       const t = token || sessionStorage.getItem("token_login");
       await fetch(`${API}/create_user_from_cart`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: JSON.stringify({ ContactNumber: String(user?.ContactNumber || ""), Email: f.email }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${t}`,
+        },
+        body: JSON.stringify({
+          ContactNumber: String(user?.ContactNumber || ""),
+          Email: addrForm.email,
+        }),
       }).catch(() => {});
     }
 
     setError("");
     setStep("review");
-    return; // ✅ yahan se hi review pe jao
-  }
-
-  // ── Saved address flow ──
-  if (!selectedAddr) {
-    setError("Please select or add an address");
-    return;
-  }
-
-  if (!user?.Email && !addrForm.email) {
-    setError("Email is required to proceed");
-    return;
-  }
-
-  if (addrForm.email) {
-    const t = token || sessionStorage.getItem("token_login");
-    await fetch(`${API}/create_user_from_cart`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-      body: JSON.stringify({ ContactNumber: String(user?.ContactNumber || ""), Email: addrForm.email }),
-    }).catch(() => {});
-  }
-
-  setError("");
-  setStep("review");
-};
+  };
 
   // ─────────────────────────────────────────────────────────────
   // COUPON
@@ -510,7 +554,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         const data = await res.json();
         if (data.success || data.orderId) {
           dispatch(clearCart());
-          onClose();
+          handleClose();
           router.push(`/order-success?id=${data.orderId}&type=cod`);
         } else {
           setError(data.message || "Order failed");
@@ -556,7 +600,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
               const vData = await vRes.json();
               if (vData.success) {
                 dispatch(clearCart());
-                onClose();
+                handleClose();
                 window.location.href = vData.redirectUrl || "/order-success";
               } else {
                 setError("Payment verification failed");
@@ -673,12 +717,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
-        onClick={(e) => e.target === e.currentTarget && onClose()}
+        onClick={(e) => e.target === e.currentTarget && handleClose()}
       >
         {/* Modal */}
         <div className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col max-h-[95dvh] sm:max-h-[90vh] overflow-hidden py-6">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-700 flex-shrink-0 ml-2"
           >
             <X size={18} />

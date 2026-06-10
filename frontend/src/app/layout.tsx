@@ -109,7 +109,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Razorpay SDK loaded dynamically on checkout */}
       </head>
 
-      <body className={inter.className}>
+      <body className={inter.className} style={{overflow:'auto'}}>
   <Providers>
     <ConditionalLayout>{children}</ConditionalLayout>
   </Providers>
