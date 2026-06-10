@@ -7,7 +7,9 @@ import {
   HelpCircle, LogOut, ChevronDown, Plus, Layers, Bell, FileText,
   PercentDiamond, Image as ImageIcon, BookOpen, MessageSquare,
   Menu, X, PackageOpen, ChevronRight, ExternalLink,
+  RefreshCw,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const MENU = [
   { title: 'Dashboard',     icon: LayoutDashboard, path: '/admin' },
@@ -41,6 +43,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [expanded,          setExpanded]          = useState<Record<string, boolean>>({});
   const [adminUser,         setAdminUser]         = useState<{ name: string; email: string } | null>(null);
   const [authChecked,       setAuthChecked]       = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const handleClear = async (paths?: string[]) => {
+    setLoading(true);
+    try {
+      const res = await fetch('https://grandmasala.in/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          secret: process.env.NEXT_PUBLIC_REVALIDATE_SECRET,
+          paths: paths || ['/'],
+        }),
+      });
+      const data = await res.json();
+      if (data.success) toast.success('✅ Cache cleared!');
+      else toast.error(data.message);
+    } catch {
+      toast.error('❌ Failed to clear cache');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ── Auth check ────────────────────────────────────────────
   useEffect(() => {
@@ -226,6 +252,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
               View Site <ExternalLink size={11} />
             </a>
+            <button
+        onClick={() => handleClear()}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2 bg-[#81190B] hover:bg-[#651307] text-white py-2.5 rounded-xl font-semibold transition-colors disabled:opacity-50"
+      >
+        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+        {loading ? 'Clearing...' : 'Clear All Cache'}
+      </button>
             {adminUser && (
               <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1.5">
                 <div className="w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { serverFetch, serverFetchNoCache, SITE_URL } from '@/lib/api';
+import { serverFetch, SITE_URL } from '@/lib/api';
 import HomeClient from '@/components/Home/HomeClient';
 
 export const metadata: Metadata = {
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   // Prefetch data server-side for SEO
   const [productsData, blogsData, settingsData] = await Promise.all([
-    serverFetchNoCache<any>('/get-product?limit=8'),
+    serverFetch<any>('/get-product?limit=8'),
     serverFetch<any>('/blog?limit=3'),
-    serverFetchNoCache<any>('/admin/settings'),
+    serverFetch<any>('/admin/settings'),
   ]);
 
   return <HomeClient 

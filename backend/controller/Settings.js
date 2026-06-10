@@ -53,3 +53,27 @@ exports.getSettings = async (req, res) => {
         res.status(500).json({ success: false, message: err.message });
     }
 };
+
+
+// controller mein
+exports.clearNextCache = async (req, res) => {
+  try {
+    const response = await fetch('https://grandmasala.in/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        secret: process.env.REVALIDATE_SECRET 
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      return res.status(500).json({ success: false, message: data.message });
+    }
+
+    return res.json({ success: true, message: '✅ Cache cleared successfully!' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

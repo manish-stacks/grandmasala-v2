@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { serverFetch, serverFetchNoCache, SITE_URL } from '@/lib/api';
+import { serverFetch, SITE_URL } from '@/lib/api';
 import ShopClient from './ShopClient';
 import { Suspense } from 'react';
 
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default async function ShopPage() {
   const [productsData, categoriesData] = await Promise.all([
-    serverFetchNoCache<any>('/get-product'),
-    serverFetchNoCache<any>('/admin/category'),
+    serverFetch<any>('/get-product'),
+    serverFetch<any>('/admin/category'),
   ]);
   return (
     <Suspense fallback={
