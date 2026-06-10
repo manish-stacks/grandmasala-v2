@@ -41,6 +41,12 @@ const corsOptions = {
     allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// server.js mein — cors() se PEHLE ye route add karo
+app.post("/api/v1/webhook/shiprocket", express.json(), (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+}, updateShiprocketDetailsWebhook);
+
 // ─────────────────────────────────────────────
 // Core Middleware
 // ─────────────────────────────────────────────
@@ -118,6 +124,7 @@ ConnectDB();
 // Redis Setup
 // ─────────────────────────────────────────────
 const redis = require('redis');
+const { updateShiprocketDetailsWebhook } = require('./controller/Order_Controller');
 const redisClient = redis.createClient({
     url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`
 });

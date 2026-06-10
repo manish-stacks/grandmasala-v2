@@ -107,7 +107,7 @@ router.post("/create_user_from_cart", RegisterUserBeforeLogin);
 router.get("/testconsole", testconsole);
 router.post("/send-login-otp", sendLoginOtp);
 router.post("/verify-login-otp", verifyLoginOtp);
-router.post('/webhook/shiprocket', updateShiprocketDetailsWebhook);
+// router.post('/webhook/shiprocket', updateShiprocketDetailsWebhook);
 
 // ─────────────────────────────────────────────
 // NEWSLETTER Routes
