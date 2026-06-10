@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'] });
 // Fetch site settings for SEO (server-side, cached 1hr)
 async function getSiteSettings() {
   try {
-    const res = await fetch(`${API_BASE}/admin/settings`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE}/admin/settings`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const data = await res.json();
     return data.data || null;
@@ -64,6 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings();
   const seo = settings?.seo || {};
+  console.log("settings",settings)
+  console.log("seo",seo)
 
   return (
     <html lang="en">
@@ -105,6 +107,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {seo.headScript && (
           <script dangerouslySetInnerHTML={{ __html: seo.headScript }} />
         )}
+        
 
         {/* Razorpay SDK loaded dynamically on checkout */}
       </head>
