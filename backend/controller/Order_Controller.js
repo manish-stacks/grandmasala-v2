@@ -1835,97 +1835,172 @@ exports.refundOrder = async (req, res) => {
    =============================================================== */
 exports.updateShiprocketDetailsWebhook = async (req, res) => {
   try {
+    console.log("========== SHIPROCKET WEBHOOK ==========");
+    console.log("Headers:", req.headers);
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+
     // ── Token Verify ──────────────────────────────────────────────
     const token = req.headers["x-api-key"];
+
+    console.log("Received Token:", token);
+    console.log("Expected Token:", process.env.SHIPROCKET_WEBHOOK_TOKEN);
+
     if (!token || token !== process.env.SHIPROCKET_WEBHOOK_TOKEN) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      console.log("❌ Unauthorized Request");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
     }
+
     const {
       awb,
       current_status,
-      order_id,         // shiprocket ka order_id  → schema: shiprocket.order_id
-      channel_order_id, // tumhara orderId          → schema: orderId
+      order_id,
+      channel_order_id,
       current_timestamp,
       shipment_status,
       courier_name,
       scans,
     } = req.body;
 
-    // ── 1. Validate ──────────────────────────────────────────────
+    console.log("Parsed Payload:", {
+      awb,
+      current_status,
+      order_id,
+      channel_order_id,
+      current_timestamp,
+      shipment_status,
+      courier_name,
+    });
+
+    // ── Validation ────────────────────────────────────────────────
     if (!current_status) {
+      console.log("❌ current_status missing");
       return res.status(200).json({
         success: false,
         message: "current_status missing in payload",
       });
     }
 
-    // ── 2. Status map ────────────────────────────────────────────
-    const mappedStatus = SHIPROCKET_STATUS_MAP[current_status.toLowerCase()];
+    // ── Status Mapping ────────────────────────────────────────────
+    const mappedStatus =
+      SHIPROCKET_STATUS_MAP[current_status.toLowerCase()];
+
+    console.log("Current Status:", current_status);
+    console.log("Mapped Status:", mappedStatus);
 
     if (!mappedStatus) {
-      console.warn(`[Shiprocket Webhook] Unmapped status: "${current_status}" — ignored`);
+      console.log("⚠️ Unmapped Status:", current_status);
       return res.status(200).json({
         success: true,
         message: `Status "${current_status}" not mapped, ignored.`,
       });
     }
 
-    // ── 3. Order dhundo ──────────────────────────────────────────
+    // ── Find Order ────────────────────────────────────────────────
     let order = null;
 
-    // Pehle shiprocket.order_id se (schema ke andar nested hai)
     if (order_id) {
-      order = await Ordermodel.findOne({ "shiprocket.order_id": String(order_id) });
+      console.log(
+        "Searching by shiprocket.order_id:",
+        String(order_id)
+      );
+
+      order = await Ordermodel.findOne({
+        "shiprocket.order_id": String(order_id),
+      });
+
+      console.log(
+        "Order found by shiprocket.order_id:",
+        order ? order.orderId : "NOT FOUND"
+      );
     }
 
-    // Phir tumhara apna orderId se (channel_order_id)
     if (!order && channel_order_id) {
-      order = await Ordermodel.findOne({ orderId: channel_order_id });
+      console.log(
+        "Searching by orderId:",
+        channel_order_id
+      );
+
+      order = await Ordermodel.findOne({
+        orderId: channel_order_id,
+      });
+
+      console.log(
+        "Order found by orderId:",
+        order ? order.orderId : "NOT FOUND"
+      );
     }
 
     if (!order) {
-      console.error(
-        `[Shiprocket Webhook] Order not found | shiprocket_id: ${order_id} | channel_id: ${channel_order_id}`
-      );
+      console.log("❌ Order Not Found");
+      console.log("shiprocket.order_id =", order_id);
+      console.log("channel_order_id =", channel_order_id);
+
       return res.status(200).json({
         success: false,
         message: "Order not found, webhook acknowledged.",
       });
     }
 
-    // ── 4. Already same status? Skip ────────────────────────────
+    console.log("✅ Order Found");
+    console.log({
+      dbOrderId: order.orderId,
+      dbStatus: order.status,
+      dbShiprocketId: order.shiprocket?.order_id,
+    });
+
+    // ── Same Status Check ─────────────────────────────────────────
     if (order.status === mappedStatus) {
+      console.log(
+        `⚠️ Status already same (${mappedStatus})`
+      );
+
       return res.status(200).json({
         success: true,
         message: "Status already up to date.",
       });
     }
 
-    // ── 5. Update — schema ke according ─────────────────────────
-    // shiprocket.* nested fields + top-level status
+    // ── Update Payload ────────────────────────────────────────────
     const updatePayload = {
       status: mappedStatus,
       "shiprocket.status": shipment_status || current_status,
       ...(awb && { "shiprocket.awb_code": String(awb) }),
-      ...(courier_name && { "shiprocket.courier_name": courier_name }),
-      ...(order_id && { "shiprocket.order_id": String(order_id) }),
+      ...(courier_name && {
+        "shiprocket.courier_name": courier_name,
+      }),
+      ...(order_id && {
+        "shiprocket.order_id": String(order_id),
+      }),
     };
+
+    console.log(
+      "Update Payload:",
+      JSON.stringify(updatePayload, null, 2)
+    );
 
     const updatedOrder = await Ordermodel.findByIdAndUpdate(
       order._id,
-      { $set: updatePayload },
-      { new: true }
+      {
+        $set: updatePayload,
+      },
+      {
+        new: true,
+      }
     );
 
-    console.log(
-      `[Shiprocket Webhook] ✅ Order ${order.orderId} | "${order.status}" → "${mappedStatus}" | AWB: ${awb || "N/A"}`
-    );
+    console.log("✅ Order Updated");
+    console.log({
+      orderId: updatedOrder.orderId,
+      oldStatus: order.status,
+      newStatus: updatedOrder.status,
+      awb: updatedOrder.shiprocket?.awb_code,
+    });
 
-    // Latest scan log (informational only)
     if (scans?.length) {
-      console.log(
-        `[Shiprocket Webhook] 📦 Last scan: ${scans[0].activity} @ ${scans[0].location} on ${scans[0].date}`
-      );
+      console.log("Latest Scan:", scans[0]);
     }
 
     return res.status(200).json({
@@ -1934,10 +2009,11 @@ exports.updateShiprocketDetailsWebhook = async (req, res) => {
       orderId: order.orderId,
       newStatus: mappedStatus,
     });
-
   } catch (error) {
-    console.error("[Shiprocket Webhook] ❌ Error:", error.message);
-    // Hamesha 200 — warna Shiprocket retry karta rahega
+    console.error("❌ WEBHOOK ERROR");
+    console.error(error);
+    console.error(error.stack);
+
     return res.status(200).json({
       success: false,
       message: "Internal error, webhook acknowledged.",
