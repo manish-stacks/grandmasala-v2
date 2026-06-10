@@ -63,7 +63,7 @@ app.use((req, res, next) => {
 // CORS bypass zaroori hai — Shiprocket external server se aata hai
 // Token verify Order_Controller ke andar hota hai
 // ─────────────────────────────────────────────
-app.post("/api/v1/webhook/shiprocket", (req, res, next) => {
+app.post("/api/v1/webhook/order-track", (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Content-Type, x-api-key");
     next();
