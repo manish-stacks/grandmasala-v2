@@ -29,13 +29,14 @@ export default function AdminDashboard() {
         fetch(`${API}/admin/get-users`, { headers }).then(r => r.json()),
         fetch(`${API}/get-product`).then(r => r.json()),
       ]);
+      console.log("recentRes, allOrdersRes, usersRes, productsRes", recentRes, allOrdersRes, usersRes, productsRes);
       setRecentOrders(recentRes.data || recentRes.orders || []);
-      const allOrders = allOrdersRes.orders || [];
+      const allOrders = allOrdersRes.data || [];
       const revenue = allOrders.reduce((s: number, o: any) => s + (o.payAmt || 0), 0);
       setStats({
         orders: allOrders.length,
         revenue,
-        users: (usersRes.users || []).length,
+        users: (usersRes.data || []).length,
         products: (productsRes.products || []).length,
       });
     } catch {} finally { setLoading(false); }
@@ -124,7 +125,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/orders/${order._id}`}
+                      <Link href={`/admin/orders/${order.orderId}`}
                         className="flex items-center gap-1 text-[#81190B] hover:underline text-sm font-medium">
                         <Eye size={14} /> View
                       </Link>

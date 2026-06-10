@@ -18,7 +18,7 @@ export default function AdminOrders() {
       const res = await fetch(`${API}/admin/get-all-order`, { headers:{ Authorization:`Bearer ${token}` } });
       const data = await res.json();
       console.log("data",data)
-      setOrders(data.orders || []);
+      setOrders(data.data || []);
     } catch {} finally { setLoading(false); }
   };
   useEffect(() => { fetchOrders(); }, []);
@@ -76,7 +76,7 @@ export default function AdminOrders() {
                         {statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
                       </select>
                     </td>
-                    <td className="px-4 py-3"><Link href={`/admin/orders/${o._id}`} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 inline-flex"><Eye size={16}/></Link></td>
+                    <td className="px-4 py-3"><Link href={`/admin/orders/${o.orderId}`} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 inline-flex"><Eye size={16}/></Link></td>
                   </tr>
                 ))}
                 {filtered.length === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-400">No orders found</td></tr>}

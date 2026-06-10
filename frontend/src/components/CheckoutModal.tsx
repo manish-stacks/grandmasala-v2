@@ -392,6 +392,7 @@ setError("");
 
     if (!addrForm.email) {
       setError("Email is required to proceed");
+      return;
     }
 
     // Email save karo agar diya hai

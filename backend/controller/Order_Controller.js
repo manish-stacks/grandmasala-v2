@@ -1088,6 +1088,7 @@ exports.getCODOrderByOrderId = async (req, res) => {
 exports.getOrderByOrderIdAdmin = async (req, res) => {
   try {
     const orderId = req.params.orderId;
+    console.log('getOrderByOrderIdAdmin orderId:', orderId)
     const order = await Ordermodel.findOne({
       orderId: orderId,
     })

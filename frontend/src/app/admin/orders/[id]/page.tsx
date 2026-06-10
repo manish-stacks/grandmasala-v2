@@ -27,6 +27,7 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+      console.log("Order data", data);
       setOrder(data.order || data.data || null);
     } catch {
       toast.error('Failed to load order');
