@@ -375,46 +375,55 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   // ADDRESS handlers
   // ─────────────────────────────────────────────────────────────
   const handleAddrNext = async () => {
-    if (addingNew) {
-      const f = addrForm;
-      if (!f.name || !f.addressLine || !f.city || !f.state || !f.postCode) {
-        setError("Please fill all required fields");
-        return;
-      }
-      const newAddr = { ...f, mobile: String(user?.ContactNumber || "") };
-      setSavedAddr(newAddr);
-      setSelectedAddr(newAddr);
-      setAddingNew(false);
-    }
-    if (!selectedAddr) {
-      setError("Please select or add an address");
+  if (addingNew) {
+    const f = addrForm;
+    if (!f.name || !f.addressLine || !f.city || !f.state || !f.postCode) {
+      setError("Please fill all required fields");
       return;
     }
+    const newAddr = { ...f, mobile: String(user?.ContactNumber || "") };
+    setSavedAddr(newAddr);
+    setSelectedAddr(newAddr);
+    setAddingNew(false);
 
-    if (!addrForm.email) {
-      setError("Email is required to proceed");
-      return;
-    }
-
-    // Email save karo agar diya hai
-    if (addrForm.email) {
+    // ✅ Email save
+    if (f.email) {
       const t = token || sessionStorage.getItem("token_login");
       await fetch(`${API}/create_user_from_cart`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${t}`,
-        },
-        body: JSON.stringify({
-          ContactNumber: String(user?.ContactNumber || ""),
-          Email: addrForm.email,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+        body: JSON.stringify({ ContactNumber: String(user?.ContactNumber || ""), Email: f.email }),
       }).catch(() => {});
     }
 
     setError("");
     setStep("review");
-  };
+    return; // ✅ yahan se hi review pe jao
+  }
+
+  // ── Saved address flow ──
+  if (!selectedAddr) {
+    setError("Please select or add an address");
+    return;
+  }
+
+  if (!user?.Email && !addrForm.email) {
+    setError("Email is required to proceed");
+    return;
+  }
+
+  if (addrForm.email) {
+    const t = token || sessionStorage.getItem("token_login");
+    await fetch(`${API}/create_user_from_cart`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+      body: JSON.stringify({ ContactNumber: String(user?.ContactNumber || ""), Email: addrForm.email }),
+    }).catch(() => {});
+  }
+
+  setError("");
+  setStep("review");
+};
 
   // ─────────────────────────────────────────────────────────────
   // COUPON

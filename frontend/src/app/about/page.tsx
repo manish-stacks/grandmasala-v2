@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function OurStory() {
   return (
     <>
-      <section className="relative py-20 overflow-hidden bg-[#fdf8f5]">
+      <section className="relative py-20 bg-[#fdf8f5]">
         <div className="container mx-auto px-5">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
 
