@@ -10,6 +10,7 @@ const ConnectDB = require('./database/database.config');
 const route = require('./routes/routes');
 const setupBullBoard = require('./bullboard');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
+const { updateShiprocketDetailsWebhook } = require('./controller/Order_Controller'); // ✅ TOP pe move kiya
 
 const app = express();
 const port = process.env.PORT || 7500;
@@ -29,7 +30,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -38,20 +38,14 @@ const corsOptions = {
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key"], // ✅ x-api-key add kiya
 };
-
-// server.js mein — cors() se PEHLE ye route add karo
-app.post("/api/v1/webhook/shiprocket", express.json(), (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    next();
-}, updateShiprocketDetailsWebhook);
 
 // ─────────────────────────────────────────────
 // Core Middleware
 // ─────────────────────────────────────────────
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Pre-flight
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
@@ -63,6 +57,17 @@ app.use((req, res, next) => {
     res.setHeader('X-XSS-Protection', '1; mode=block');
     next();
 });
+
+// ─────────────────────────────────────────────
+// Shiprocket Webhook ✅
+// CORS bypass zaroori hai — Shiprocket external server se aata hai
+// Token verify Order_Controller ke andar hota hai
+// ─────────────────────────────────────────────
+app.post("/api/v1/webhook/shiprocket", (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Content-Type, x-api-key");
+    next();
+}, updateShiprocketDetailsWebhook);
 
 // ─────────────────────────────────────────────
 // Health check
@@ -104,14 +109,14 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // ─────────────────────────────────────────────
-// SEO Routes (before /api/v1)
+// SEO Routes
 // ─────────────────────────────────────────────
 const { getSitemap, getRobotsTxt } = require('./controller/sitemap.controller');
 app.get('/sitemap.xml', getSitemap);
 app.get('/robots.txt', getRobotsTxt);
 
 // ─────────────────────────────────────────────
-// Bull Board (queue monitoring)
+// Bull Board
 // ─────────────────────────────────────────────
 setupBullBoard(app);
 
@@ -124,29 +129,23 @@ ConnectDB();
 // Redis Setup
 // ─────────────────────────────────────────────
 const redis = require('redis');
-const { updateShiprocketDetailsWebhook } = require('./controller/Order_Controller');
 const redisClient = redis.createClient({
     url: `redis://${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || 6379}`
 });
 
 const connectRedis = async () => {
     try {
-        redisClient.on('error', (err) => {
-            console.error(`Redis Error: ${err.message}`);
-        });
+        redisClient.on('error', (err) => console.error(`Redis Error: ${err.message}`));
         redisClient.on('ready', () => console.log('✅ Redis connected'));
         await redisClient.connect();
         await redisClient.ping();
         app.locals.redis = redisClient;
     } catch (error) {
         console.error(`Redis connection failed: ${error.message}`);
-        // Don't exit — Redis is optional for basic functionality
     }
 };
 
-(async () => {
-    await connectRedis();
-})();
+(async () => { await connectRedis(); })();
 
 // ─────────────────────────────────────────────
 // API Routes
