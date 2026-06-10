@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { serverFetch, SITE_URL } from "@/lib/api";
+import { serverFetch, serverFetchNoCache, SITE_URL } from "@/lib/api";
 import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
 
@@ -9,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const data = await serverFetch<any>(`/get-product/${id}`);
+  const data = await serverFetchNoCache<any>(`/get-product/${id}`);
   if (!data?.data) return { title: "Product Not Found" };
   const p = data.data;
   const price =
@@ -48,7 +48,7 @@ export async function generateMetadata({
 export default async function  Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   console.log("id",id)
-  const data = await serverFetch<any>(`/get-product/${id}`);
+  const data = await serverFetchNoCache<any>(`/get-product/${id}`);
   console.log("data",data)
   if (!data?.data) notFound();
 
