@@ -284,12 +284,13 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         return;
       }
       sessionStorage.setItem("token_login", data.token);
-setToken(data.token);
-setUser(data.login || {});
-setAddingNew(true); // ✅ new user — seedha form
-setAddrForm((p) => ({ ...p, name: "" }));
-setStep("address");
-setError("");
+      setToken(data.token);
+      setUser(data.login || {});
+      setAddingNew(true); // ✅ new user — seedha form
+      setAddrForm((p) => ({ ...p, name: "" }));
+      setStep("address");
+      setError("");
+      setAddrForm((p) => ({ ...p, Email: data.login?.Email || "" }));
     } catch {
       setError("Could not connect to server");
     } finally {
@@ -584,62 +585,67 @@ setError("");
   };
 
   useEffect(() => {
-  document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
-  fetch(`${API}/settings`)
-    .then((r) => r.json())
-    .then((d) => {
-      if (d.data?.freeShippingThreshold) setFreeThreshold(d.data.freeShippingThreshold);
-      if (d.data?.shippingCost) setShippingCost(d.data.shippingCost);
-    })
-    .catch(() => {})
-    .finally(() => setSettingsLoaded(true));
+    fetch(`${API}/settings`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.data?.freeShippingThreshold)
+          setFreeThreshold(d.data.freeShippingThreshold);
+        if (d.data?.shippingCost) setShippingCost(d.data.shippingCost);
+      })
+      .catch(() => {})
+      .finally(() => setSettingsLoaded(true));
 
-  const t = sessionStorage.getItem("token_login");
-  if (!t) return;
-  setToken(t);
+    const t = sessionStorage.getItem("token_login");
+    if (!t) return;
+    setToken(t);
 
-  fetch(`${API}/my-details`, { headers: { Authorization: `Bearer ${t}` } })
-    .then((r) => r.json())
-    .then((d) => {
-      if (!d.data) return;
-      const u = d.data;
-      setUser(u);
-      setStep("address");
-      setAlreadyLoggedIn(true);
+    fetch(`${API}/my-details`, { headers: { Authorization: `Bearer ${t}` } })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.data) return;
+        const u = d.data;
+        setUser(u);
+        setStep("address");
+        setAlreadyLoggedIn(true);
 
-      fetch(`${API}/my-last-order`, { headers: { Authorization: `Bearer ${t}` } })
-        .then((r) => r.json())
-        .then((od) => {
-          if (od.order?.shipping) {
-            const s = od.order.shipping;
-            const addr = {
-              name: s.name,
-              addressLine: s.addressLine,
-              city: s.city,
-              state: s.state,
-              postCode: s.postCode,
-              addressType: s.addressType || "Home",
-              mobile: s.mobileNumber || String(u.ContactNumber || ""),
-            };
-            setSavedAddr(addr);
-            setSelectedAddr(addr);
-          } else {
-            // ✅ No saved address — seedha form open karo
+        fetch(`${API}/my-last-order`, {
+          headers: { Authorization: `Bearer ${t}` },
+        })
+          .then((r) => r.json())
+          .then((od) => {
+            if (od.order?.shipping) {
+              const s = od.order.shipping;
+              const addr = {
+                name: s.name,
+                addressLine: s.addressLine,
+                city: s.city,
+                state: s.state,
+                postCode: s.postCode,
+                addressType: s.addressType || "Home",
+                mobile: s.mobileNumber || String(u.ContactNumber || ""),
+              };
+              setSavedAddr(addr);
+              setSelectedAddr(addr);
+            } else {
+              // ✅ No saved address — seedha form open karo
+              setAddingNew(true);
+              setAddrForm((p) => ({ ...p, name: "" }));
+            }
+          })
+          .catch(() => {
+            // ✅ API fail bhi ho to form open karo
             setAddingNew(true);
             setAddrForm((p) => ({ ...p, name: "" }));
-          }
-        })
-        .catch(() => {
-          // ✅ API fail bhi ho to form open karo
-          setAddingNew(true);
-          setAddrForm((p) => ({ ...p, name: "" }));
-        });
-    })
-    .catch(() => {});
+          });
+      })
+      .catch(() => {});
 
-  return () => { document.body.style.overflow = ""; };
-}, []);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   // ─────────────────────────────────────────────────────────────
   // RENDER
