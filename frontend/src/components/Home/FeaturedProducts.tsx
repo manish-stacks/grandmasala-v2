@@ -14,6 +14,7 @@ const seededRandom = (seed: string) => {
 };
 
 export default function FeaturedProducts({ initialProducts }: { initialProducts: any[] }) {
+  // console.log("initialProducts", initialProducts)
   const dispatch = useAppDispatch();
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 

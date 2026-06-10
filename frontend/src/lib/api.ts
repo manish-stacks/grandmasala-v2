@@ -11,7 +11,7 @@ export const api = axios.create({
 export async function serverFetch<T>(endpoint: string): Promise<T | null> {
   try {
     const res = await fetch(`${API_URL}${endpoint}`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      next: { revalidate: 300 }, // Cache for 1 hour
     });
     if (!res.ok) return null;
     return res.json();
