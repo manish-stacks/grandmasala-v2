@@ -7,7 +7,7 @@ import Image from 'next/image';
 const SLIDES = [
   {
     id: 0,
-    image: '/images/hero-1.png',
+    image: '/images/hero3.png',
 
   },
   {
