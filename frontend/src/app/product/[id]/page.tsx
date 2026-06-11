@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { serverFetch, serverFetchNoCache, SITE_URL } from "@/lib/api";
 import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
+import RelatedProducts from "@/components/Relatedproducts";
+// import RelatedProducts from "@/components/Product/RelatedProducts";
 
 export async function generateMetadata({
   params,
@@ -45,16 +47,51 @@ export async function generateMetadata({
   };
 }
 
-export default async function  Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
-  console.log("id",id)
-  const data = await serverFetch<any>(`/get-product/${id}`);
-  console.log("data",data)
+
+  // Product + All products parallel fetch
+  const [data, allProductsData] = await Promise.all([
+    serverFetch<any>(`/get-product/${id}`),
+    serverFetch<any>(`/get-product?limit=20`),
+  ]);
+
   if (!data?.data) notFound();
 
   const p = data.data;
   const price =
     p.Varient?.[0]?.price_after_discount || p.afterDiscountPrice || p.price;
+
+  // Related: same category pehle, baaki se fill karo, current product exclude, max 4
+  // Shuffle helper
+  const shuffleArray = (arr: any[]) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const allProducts: any[] = allProductsData?.products || [];
+
+  const sameCategory = shuffleArray(
+    allProducts.filter(
+      (x) => x._id !== id && x.category?._id === p.category?._id,
+    ),
+  );
+
+  const otherCategory = shuffleArray(
+    allProducts.filter(
+      (x) => x._id !== id && x.category?._id !== p.category?._id,
+    ),
+  );
+
+  const related = [...sameCategory, ...otherCategory].slice(0, 4);
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -77,10 +114,15 @@ export default async function  Page({ params }: { params: Promise<{ id: string }
       reviewCount: "400",
     },
   };
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <ProductDetailClient product={p} />
+      {related.length > 0 && <RelatedProducts products={related} />}
     </>
   );
 }

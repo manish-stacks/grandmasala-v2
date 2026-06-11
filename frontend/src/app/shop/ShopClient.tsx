@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Grid, List, ShoppingCart, Star, ChevronDown } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, Grid, List, ShoppingCart, Star, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -13,13 +13,14 @@ const seededRandom = (s: string) => { let h=0; for(let i=0;i<s.length;i++){h=(h<
 export default function ShopClient({ initialProducts, initialCategories }: { initialProducts: any[]; initialCategories: any[] }) {
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState(initialProducts);
+  const [products] = useState(initialProducts);
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
   const [priceRange, setPriceRange] = useState('all');
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null); // ✅ hover state
 
   const categories = ['All', ...initialCategories.map((c: any) => c.name)];
 
@@ -127,13 +128,54 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
               return (
                 <div key={product._id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
                   <Link href={`/product/${product._id}`}>
-                    <div className="relative h-56 overflow-hidden bg-[#F4F1EA]">
-                      {product.ProductMainImage?.url
-                        ? <Image src={product.ProductMainImage.url} alt={product.product_name} fill className="object-cover p-2 group-hover:scale-105 transition-transform duration-500" sizes="25vw" />
-                        : <div className="w-full h-full flex items-center justify-center text-5xl">🌶</div>}
-                      {disc > 0 && <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">{disc}% OFF</span>}
+                    {/* ✅ hover state + no zoom */}
+                    <div
+                      className="relative h-56 overflow-hidden bg-[#F4F1EA]"
+                      onMouseEnter={() => setHoveredProduct(product._id)}
+                      onMouseLeave={() => setHoveredProduct(null)}
+                    >
+                      {product.ProductMainImage?.url ? (
+                        <>
+                          {/* Main Image — no zoom */}
+                          <Image
+                            src={product.ProductMainImage.url}
+                            alt={product.product_name}
+                            fill
+                            className={`object-cover p-2 transition-opacity duration-500 ${
+                              hoveredProduct === product._id && product.SecondImage?.url
+                                ? 'opacity-0'
+                                : 'opacity-100'
+                            }`}
+                            sizes="25vw"
+                          />
+
+                          {/* Hover Image — SecondImage */}
+                          {product.SecondImage?.url && (
+                            <Image
+                              src={product.SecondImage.url}
+                              alt={`${product.product_name} view 2`}
+                              fill
+                              className={`object-cover p-2 transition-opacity duration-500 ${
+                                hoveredProduct === product._id
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              }`}
+                              sizes="25vw"
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-5xl">🌶</div>
+                      )}
+
+                      {disc > 0 && (
+                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                          {disc}% OFF
+                        </span>
+                      )}
                     </div>
                   </Link>
+
                   <div className="p-4">
                     <p className="text-xs text-gray-400 font-medium mb-1">GRAND MASALA</p>
                     <Link href={`/product/${product._id}`}><h3 className="font-bold text-gray-900 group-hover:text-[#81190B] transition-colors truncate">{product.product_name}</h3></Link>

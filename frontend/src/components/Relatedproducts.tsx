@@ -4,7 +4,7 @@ import { ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAppDispatch } from "@/store/hooks";
-import { addToCart, openCartSidebar } from "@/store/slices/cartSlice";
+import { addToCart } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";
 
 const seededRandom = (seed: string) => {
@@ -16,12 +16,7 @@ const seededRandom = (seed: string) => {
   return Math.abs(hash);
 };
 
-export default function FeaturedProducts({
-  initialProducts,
-}: {
-  initialProducts: any[];
-}) {
-  // console.log("initialProducts", initialProducts)
+export default function RelatedProducts({ products }: { products: any[] }) {
   const dispatch = useAppDispatch();
   const [selectedVariants, setSelectedVariants] = useState<
     Record<string, string>
@@ -55,27 +50,28 @@ export default function FeaturedProducts({
     toast.success(`${product.product_name} added to cart!`);
   };
 
-  if (!initialProducts.length) return null;
+  if (!products.length) return null;
 
   return (
     <section className="py-16 bg-[#F4F1EA]">
       <div className="container mx-auto px-4">
+        {/* Heading */}
         <div className="text-center mb-14">
           <span className="inline-block px-4 py-2 rounded-full bg-[#FFF3E5] text-[#81190B] text-sm font-semibold mb-4">
-            🌶 Premium Indian Spices
+            🌶 You May Also Like
           </span>
-
           <h2 className="text-4xl md:text-5xl font-bold text-[#81190B]">
-            Featured Products
+            Related Products
           </h2>
-
           <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-            Handpicked traditional spices crafted with purity, rich aroma, and
+            Explore more handpicked traditional spices crafted with purity and
             authentic Indian taste.
           </p>
         </div>
+
+        {/* Cards — same as FeaturedProducts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {initialProducts.map((product) => {
+          {products.map((product) => {
             const variant = getVariant(product);
             const price = variant
               ? variant.price_after_discount
@@ -84,10 +80,11 @@ export default function FeaturedProducts({
             const rating = (seededRandom(product._id + "rating") % 2) + 4;
             const reviews = (seededRandom(product._id + "reviews") % 451) + 50;
             const disc = variant?.discount_percentage || product.discount || 0;
+
             return (
               <div
                 key={product._id}
-                className="group bg-white rounded-3xl overflow-hidden border border-[#E8DCCB] shadow-md hover:shadow-2xl transition-all duration-500"
+                className="group bg-white rounded-3xl overflow-hidden border border-[#E8DCCB] shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
               >
                 <Link href={`/product/${product._id}`}>
                   <div
@@ -149,7 +146,6 @@ export default function FeaturedProducts({
 
                 <div className="p-5">
                   <Link href={`/product/${product._id}`}>
-                    {/* Product Name */}
                     <h3 className="font-bold text-lg text-[#81190B] line-clamp-2 min-h-[56px]">
                       {product.product_name}
                     </h3>
@@ -173,7 +169,7 @@ export default function FeaturedProducts({
                     </span>
                   </div>
 
-                  {/* Variant */}
+                  {/* Variant Selector */}
                   {product.isVarient && product.Varient?.length > 0 && (
                     <select
                       value={
@@ -200,13 +196,11 @@ export default function FeaturedProducts({
                     <span className="text-2xl font-bold text-[#81190B]">
                       ₹{Number(price).toFixed(0)}
                     </span>
-
                     {originalPrice > price && (
                       <>
                         <span className="text-sm text-gray-400 line-through">
                           ₹{originalPrice}
                         </span>
-
                         <span className="text-green-600 text-sm font-semibold">
                           Save ₹{(originalPrice - price).toFixed(0)}
                         </span>
@@ -227,6 +221,8 @@ export default function FeaturedProducts({
             );
           })}
         </div>
+
+        {/* View All */}
         <div className="text-center mt-10">
           <Link
             href="/shop"
