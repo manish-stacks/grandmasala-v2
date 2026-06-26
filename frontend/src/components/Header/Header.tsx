@@ -80,7 +80,7 @@ export default function Header() {
       </div>
 
       <div className="bg-[#F4F1EA]">
-        <div className="max-w-7xl mx-auto px-4 py-2">
+        <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between">
             <Link href="/" onClick={() => setIsMenuOpen(false)}>
               <Image
@@ -193,7 +193,7 @@ export default function Header() {
 
       {isMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
               {navLinks.map(([href, label]) => (
                 <Link

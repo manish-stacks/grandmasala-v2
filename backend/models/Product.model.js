@@ -33,6 +33,12 @@ const Product_Schema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        slug: {
+            type: String,
+            unique: true,
+            sparse: true, // allows old products without a slug to exist until backfilled
+            index: true,
+        },
         product_description: {
             type: String,
             required: true,

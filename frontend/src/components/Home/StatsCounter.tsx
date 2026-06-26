@@ -36,7 +36,7 @@ function Counter({ end, suffix }: { end: number; suffix: string }) {
 export default function StatsCounter() {
   return (
     <section className="py-16 bg-[#81190B] text-white">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           {stats.map(({ end, suffix, label }) => (
             <div key={label} className="p-6">

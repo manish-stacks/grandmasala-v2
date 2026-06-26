@@ -89,7 +89,7 @@ export default function FeaturedProducts({
                 key={product._id}
                 className="group bg-white rounded-3xl overflow-hidden border border-[#E8DCCB] shadow-md hover:shadow-2xl transition-all duration-500"
               >
-                <Link href={`/product/${product._id}`}>
+                <Link href={`/product/${product.slug || product._id}`}>
                   <div
                     className="relative h-64 bg-[#F4F1EA] overflow-hidden"
                     onMouseEnter={() => setHoveredProduct(product._id)}
@@ -148,7 +148,7 @@ export default function FeaturedProducts({
                 </Link>
 
                 <div className="p-5">
-                  <Link href={`/product/${product._id}`}>
+                  <Link href={`/product/${product.slug || product._id}`}>
                     {/* Product Name */}
                     <h3 className="font-bold text-lg text-[#81190B] line-clamp-2 min-h-[56px]">
                       {product.product_name}

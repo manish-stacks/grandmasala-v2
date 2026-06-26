@@ -309,7 +309,7 @@ export default function AdminOrderDetail({ params }: { params: Promise<{ id: str
 
   /* ================= RENDER ================= */
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto space-y-6">
 
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">

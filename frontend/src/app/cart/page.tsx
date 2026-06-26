@@ -31,7 +31,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/shop" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
               <ArrowLeft size={20} className="mr-2" /> Continue Shopping
@@ -42,7 +42,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {cartItems.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center"><ShoppingBag size={40} className="text-gray-400"/></div>

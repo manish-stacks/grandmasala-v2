@@ -20,7 +20,7 @@ export default function Footer() {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/settings`)
       .then((r) => r.json())
       .then((d) => setSetting(d.data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,7 +78,7 @@ export default function Footer() {
     <>
       <footer className="bg-[#81190B] text-white py-16 relative">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Brand Info */}
             <div>
               <div className="flex flex-col mb-2 gap-1">
@@ -227,52 +227,71 @@ export default function Footer() {
 
             {/* Also Available On */}
             <div>
-              <h3 className="text-lg font-bold mb-6">Also Available On</h3>
+              <h3 className="text-lg font-bold mb-6 text-white">
+                Also Available On
+              </h3>
+
               <ul className="space-y-3">
+
+                {/* Amazon */}
                 <li>
                   <a
                     href="https://www.amazon.in/s?k=grand+masala"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-2.5 transition-all group w-fit"
+                    className="flex items-center justify-between gap-4 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 transition-all w-full max-w-[260px]"
                   >
-                    {/* <svg width="22" height="22" viewBox="0 0 48 48" fill="none"> */}
-                    <span className="text-xl">🛒</span>
-                    {/* </svg> */}
-                    {/* Amazon wordmark */}
-                    <span className="flex flex-col leading-tight">
-                      <span className="text-white font-bold text-sm tracking-wide">
-                        amazon
-                      </span>
-                      <span className="text-[#FF9900] text-[10px] font-semibold tracking-wider">
-                        Shop Now →
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">🛒</span>
+
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-white font-semibold text-sm tracking-wide">
+                          Amazon
+                        </span>
+                        <span className="text-[#FF9900] text-[10px] font-medium tracking-wider">
+                          Shop Now
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="text-white/70 text-xs group-hover:translate-x-1 transition">
+                      →
                     </span>
                   </a>
                 </li>
+
+                {/* Blinkit */}
                 <li>
                   <a
                     href="https://blinkit.com/s/?q=grand+masala"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-4 py-2.5 transition-all group w-fit"
+                    className="flex items-center justify-between gap-4 bg-white/10 hover:bg-white/20 border border-white/15 rounded-2xl px-4 py-3 transition-all w-full max-w-[260px]"
                   >
-                    <span className="text-xl">⚡</span>
-                    <span className="flex flex-col leading-tight">
-                      <span className="text-white font-bold text-sm tracking-wide">
-                        blinkit
-                      </span>
-                      <span className="text-[#F8CB2E] text-[10px] font-semibold tracking-wider">
-                        Quick Delivery →
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">⚡</span>
+
+                      <div className="flex flex-col leading-tight">
+                        <span className="text-white font-semibold text-sm tracking-wide">
+                          Blinkit
+                        </span>
+                        <span className="text-[#F8CB2E] text-[10px] font-medium tracking-wider">
+                          Quick Delivery
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="text-white/70 text-xs group-hover:translate-x-1 transition">
+                      →
                     </span>
                   </a>
                 </li>
+
               </ul>
             </div>
 
             {/* Newsletter */}
-            <div>
+            {/* <div>
               <h3 className="text-lg font-bold mb-6">Newsletter</h3>
               <p className="text-white/80 mb-4">
                 Sign up with your email to join our mailing list.
@@ -303,7 +322,7 @@ export default function Footer() {
                   </button>
                 </form>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Bottom bar */}

@@ -11,6 +11,7 @@ import VideoTestimonial from './VideoTestimonial';
 import OurStory from './OurStory';
 import GrandmaMasalaProcess from './GrandmaMasalaProcess';
 import WhyGrandMasala from './WhyGrandMasala';
+
 interface HomeClientProps {
   initialProducts: any[];
   initialBlogs: any[];
@@ -24,7 +25,6 @@ export default function HomeClient({ initialProducts, initialBlogs, settings }: 
       <FeaturedProducts initialProducts={initialProducts} />
       <VideoTestimonial />
       <WhyGrandMasala />
-      {/* <ShopByCategory /> */}
       <StatsCounter />
       <SpiceQuality />
       <GrandmaMasalaProcess />

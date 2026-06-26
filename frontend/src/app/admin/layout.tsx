@@ -7,7 +7,7 @@ import {
   HelpCircle, LogOut, ChevronDown, Plus, Layers, Bell, FileText,
   PercentDiamond, Image as ImageIcon, BookOpen, MessageSquare,
   Menu, X, PackageOpen, ChevronRight, ExternalLink,
-  RefreshCw,
+  RefreshCw, Star,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -25,6 +25,7 @@ const MENU = [
     { title: 'All Blogs',   path: '/admin/blogs',        icon: Layers },
   ]},
   { title: 'Coupons',       icon: PercentDiamond,  path: '/admin/coupons' },
+  { title: 'Reviews',       icon: Star,            path: '/admin/reviews' },
   // { title: 'Reports',       icon: BarChart3,       path: '/admin/reports' },
   { title: 'Announcements', icon: Bell,            path: '/admin/announcements' },
   { title: 'Pages',         icon: FileText,        path: '/admin/pages' },

@@ -6,7 +6,7 @@ export default function BlogSection({ initialBlogs }: { initialBlogs: any[] }) {
   
   return (
     <div className="relative bg-[#F4F1EA] py-16 px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto">
         <div className="mb-12 text-center">
           <div className="flex justify-center"><div className="w-16 h-1 bg-[#81190B] mb-2" /></div>
           <h2 className="text-3xl lg:text-4xl font-black text-[#81190B] mb-4">Spice Blogs</h2>

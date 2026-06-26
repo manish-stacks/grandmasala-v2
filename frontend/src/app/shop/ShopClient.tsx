@@ -57,7 +57,7 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
         <p className="text-white/80">100% Pure · Handmade · No Preservatives</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Filters */}
         <div className="bg-white rounded-2xl shadow-sm p-4 mb-8 flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-48">
@@ -107,13 +107,13 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
 
               if (viewMode === 'list') return (
                 <div key={product._id} className="bg-white rounded-2xl shadow-sm p-4 flex gap-4 items-center hover:shadow-md transition-shadow">
-                  <Link href={`/product/${product._id}`} className="flex-shrink-0">
+                  <Link href={`/product/${product.slug || product._id}`} className="flex-shrink-0">
                     {product.ProductMainImage?.url
                       ? <Image src={product.ProductMainImage.url} alt={product.product_name} width={100} height={100} className="rounded-xl object-cover w-24 h-24" />
                       : <div className="w-24 h-24 bg-[#F4F1EA] rounded-xl flex items-center justify-center text-3xl">🌶</div>}
                   </Link>
                   <div className="flex-1">
-                    <Link href={`/product/${product._id}`}><h3 className="font-bold text-gray-900 hover:text-[#81190B]">{product.product_name}</h3></Link>
+                    <Link href={`/product/${product.slug || product._id}`}><h3 className="font-bold text-gray-900 hover:text-[#81190B]">{product.product_name}</h3></Link>
                     <div className="flex items-center my-1">{[...Array(5)].map((_,i) => <Star key={i} size={12} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />)}<span className="text-xs text-gray-400 ml-1">({reviews})</span></div>
                     <p className="text-gray-500 text-sm line-clamp-1">{product.product_description}</p>
                   </div>
@@ -127,10 +127,10 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
 
               return (
                 <div key={product._id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                  <Link href={`/product/${product._id}`}>
+                  <Link href={`/product/${product.slug || product._id}`}>
                     {/* ✅ hover state + no zoom */}
                     <div
-                      className="relative h-56 overflow-hidden bg-[#F4F1EA]"
+                      className="relative h-90 overflow-hidden bg-white"
                       onMouseEnter={() => setHoveredProduct(product._id)}
                       onMouseLeave={() => setHoveredProduct(null)}
                     >
@@ -141,7 +141,7 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                             src={product.ProductMainImage.url}
                             alt={product.product_name}
                             fill
-                            className={`object-cover p-2 transition-opacity duration-500 ${
+                            className={`object-cover p-2 transition-opacity duration-500 rounded-t-2xl ${
                               hoveredProduct === product._id && product.SecondImage?.url
                                 ? 'opacity-0'
                                 : 'opacity-100'
@@ -155,7 +155,7 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                               src={product.SecondImage.url}
                               alt={`${product.product_name} view 2`}
                               fill
-                              className={`object-cover p-2 transition-opacity duration-500 ${
+                              className={`object-cover p-2 transition-opacity duration-500 rounded-t-2xl ${
                                 hoveredProduct === product._id
                                   ? 'opacity-100'
                                   : 'opacity-0'
@@ -178,7 +178,7 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
 
                   <div className="p-4">
                     <p className="text-xs text-gray-400 font-medium mb-1">GRAND MASALA</p>
-                    <Link href={`/product/${product._id}`}><h3 className="font-bold text-gray-900 group-hover:text-[#81190B] transition-colors truncate">{product.product_name}</h3></Link>
+                    <Link href={`/product/${product.slug || product._id}`}><h3 className="font-bold text-gray-900 group-hover:text-[#81190B] transition-colors truncate">{product.product_name}</h3></Link>
                     <div className="flex items-center my-2">{[...Array(5)].map((_,i) => <Star key={i} size={12} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'} />)}<span className="text-xs text-gray-400 ml-1">({reviews})</span></div>
                     {product.isVarient && product.Varient?.length > 0 && (
                       <div className="relative mb-3">

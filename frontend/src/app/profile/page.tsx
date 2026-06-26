@@ -284,7 +284,7 @@ export default function ProfilePage() {
                 {wishlist.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {wishlist.map((item: any) => (
-                      <Link key={item._id} href={`/product/${item._id}`}
+                      <Link key={item._id} href={`/product/${item.slug || item._id}`}
                         className="flex gap-3 p-3 border border-gray-100 rounded-2xl hover:border-purple-200 hover:shadow-sm transition-all">
                         <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
                           {item.ProductMainImage?.url

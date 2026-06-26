@@ -1,4 +1,5 @@
 const ProductModel = require('../models/Product.model');
+const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 const dotenv = require('dotenv');
@@ -12,6 +13,34 @@ cloudinary.config({
 
 const sanitizeFileName = (fileName) => {
     return `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9-_]/g, "_")}`;
+};
+
+// Turns "A2 Desi Cow Ghee 1000ml Jar!" into "a2-desi-cow-ghee-1000ml-jar"
+const slugify = (text) => {
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")   // strip anything that isn't a word char, space, or hyphen
+        .replace(/[\s_]+/g, "-")    // spaces/underscores -> hyphen
+        .replace(/-+/g, "-");       // collapse repeated hyphens
+};
+
+// Ensures the slug is unique by appending -2, -3, etc. if needed.
+// excludeId lets updateProduct check uniqueness while ignoring the product's own current doc.
+const generateUniqueSlug = async (baseText, excludeId = null) => {
+    const base = slugify(baseText);
+    let slug = base;
+    let counter = 2;
+
+    while (true) {
+        const query = { slug };
+        if (excludeId) query._id = { $ne: excludeId };
+        const existing = await ProductModel.findOne(query).select('_id').lean();
+        if (!existing) return slug;
+        slug = `${base}-${counter}`;
+        counter += 1;
+    }
 };
 
 
@@ -91,9 +120,13 @@ exports.createProduct = async (req, res) => {
 
         const categoriesChile = sub_category && sub_category !== '' ? sub_category : null;
 
+        // Auto-generate a unique, SEO-friendly slug from the product name
+        const slug = await generateUniqueSlug(product_name);
+
         // Construct product data
         const productData = {
             product_name,
+            slug,
             product_description,
             isVarient: JSON.parse(isVarient || false),
             Varient: isVarient === 'false' ? [] : parsedVarients,
@@ -244,7 +277,13 @@ exports.getProductsBySubCategory = async (req, res) => {
 exports.getProductById = async (req, res) => {
     try {
         const { id } = req.params;
-        const product = await ProductModel.findById(id).populate('sub_category').populate('category');
+
+        // Supports both the new SEO-friendly slug ("a2-desi-cow-ghee-1000ml-jar")
+        // and the legacy MongoDB _id, so old bookmarked/shared links keep working.
+        const isObjectId = mongoose.Types.ObjectId.isValid(id) && /^[0-9a-fA-F]{24}$/.test(id);
+        const query = isObjectId ? { _id: id } : { slug: id };
+
+        const product = await ProductModel.findOne(query).populate('sub_category').populate('category');
 
         if (!product) {
             return res.status(404).json({
@@ -319,6 +358,17 @@ exports.updateProduct = async (req, res) => {
         // Handle basic field updates
         if (product_name !== undefined) updateFields.product_name = product_name;
         if (product_description !== undefined) updateFields.product_description = product_description;
+
+        // Backfill a slug for legacy products that don't have one yet. We
+        // deliberately never overwrite an existing slug here, since changing
+        // it on every name edit would silently break already-shared/SEO'd URLs.
+        if (product_name !== undefined) {
+            const existingProduct = await ProductModel.findById(productId).select('slug').lean();
+            if (existingProduct && !existingProduct.slug) {
+                updateFields.slug = await generateUniqueSlug(product_name, productId);
+            }
+        }
+
         if (price !== undefined) updateFields.price = price;
         if (discount !== undefined) updateFields.discount = discount;
         if (afterDiscountPrice !== undefined) updateFields.afterDiscountPrice = afterDiscountPrice;
@@ -502,4 +552,3 @@ exports.search_product_and_filter = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error. Please try again later." });
     }
 };
-

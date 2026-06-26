@@ -6,6 +6,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'api.grandmasala.in' },
       { protocol: 'https', hostname: 'grandmasala.in' },
       { protocol: 'https', hostname: 'someindiangirl.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
       {
         protocol: 'http',
         hostname: 'localhost',

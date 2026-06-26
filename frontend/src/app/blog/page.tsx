@@ -19,7 +19,7 @@ export default async function BlogsPage() {
         <h1 className="text-5xl md:text-6xl font-bold mb-4">Our <span className="text-amber-400">Blogs</span></h1>
         <p className="text-white/80">Spice guides, recipes, and health benefits</p>
       </div>
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12">
         {blogs.length === 0 ? (
           <p className="text-center text-gray-500 py-16">No blogs yet. Check back soon!</p>
         ) : (

@@ -86,7 +86,7 @@ export default function RelatedProducts({ products }: { products: any[] }) {
                 key={product._id}
                 className="group bg-white rounded-3xl overflow-hidden border border-[#E8DCCB] shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
               >
-                <Link href={`/product/${product._id}`}>
+                <Link href={`/product/${product.slug || product._id}`}>
                   <div
                     className="relative h-64 bg-[#F4F1EA] overflow-hidden"
                     onMouseEnter={() => setHoveredProduct(product._id)}
@@ -145,7 +145,7 @@ export default function RelatedProducts({ products }: { products: any[] }) {
                 </Link>
 
                 <div className="p-5">
-                  <Link href={`/product/${product._id}`}>
+                  <Link href={`/product/${product.slug || product._id}`}>
                     <h3 className="font-bold text-lg text-[#81190B] line-clamp-2 min-h-[56px]">
                       {product.product_name}
                     </h3>

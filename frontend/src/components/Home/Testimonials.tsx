@@ -31,7 +31,7 @@ export default function Testimonials() {
 
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-2"><div className="w-16 h-1 bg-[#81190B]" /></div>
           <h2 className="text-3xl lg:text-4xl font-black text-[#81190B]">What Our Customers Say</h2>

@@ -11,13 +11,18 @@ const {
   verifyLoginOtp,
 } = require("../controller/User.controller");
 
-const { protect } = require("../middleware/auth");
+const { protect, isAdmin } = require("../middleware/auth");
 
 const {
   createProduct, getAllProducts, deleteProductById,
   getProductById, updateProduct, getProductsByCategory,
   getProductsBySubCategory, search_product_and_filter, updateIsShowOnHome,
 } = require("../controller/Product.controller");
+
+const {
+  getReviewsByProduct, addReview, getMyReviewableOrders,
+  getAllReviewsAdmin, updateReviewStatus, deleteReviewAdmin,
+} = require("../controller/Review.controller");
 
 const multer = require("multer");
 
@@ -207,6 +212,18 @@ router.get("/get-product/by-sub-category/:id", getProductsBySubCategory);
 router.delete("/delete-product/:id", deleteProductById);
 router.put("/update-show-home/:id", updateIsShowOnHome);
 router.get("/search_product_and_filter", search_product_and_filter);
+
+// ─────────────────────────────────────────────
+// REVIEWS
+// ─────────────────────────────────────────────
+router.get("/get-reviews/:productId", getReviewsByProduct);
+router.post("/add-review/:productId", protect, addReview);
+router.get("/get-my-reviewable-orders/:productId", protect, getMyReviewableOrders);
+
+// Admin moderation — requires a logged-in user whose JWT Role is "Admin".
+router.get("/admin/reviews", protect, isAdmin, getAllReviewsAdmin);
+router.put("/admin/reviews/:reviewId/status", protect, isAdmin, updateReviewStatus);
+router.delete("/admin/reviews/:reviewId", protect, isAdmin, deleteReviewAdmin);
 
 // ─────────────────────────────────────────────
 // ORDERS & PAYMENTS

@@ -34,3 +34,16 @@ exports.protect = async (req, res, next) => {
     });
   }
 };
+
+// Run *after* protect — checks the Role embedded in the JWT at login time
+// (jwt.sign({ id: { _id, Role } }, ...)), so no extra DB lookup is needed.
+exports.isAdmin = (req, res, next) => {
+  const role = req.user?.id?.Role;
+  if (role !== 'Admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Admin access required',
+    });
+  }
+  next();
+};
