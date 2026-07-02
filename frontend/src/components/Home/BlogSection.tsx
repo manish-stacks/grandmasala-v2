@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function BlogSection({ initialBlogs }: { initialBlogs: any[] }) {
-  
+
   return (
     <div className="relative bg-[#F4F1EA] py-16 px-6 lg:px-8">
       <div className="container mx-auto">
@@ -16,7 +16,7 @@ export default function BlogSection({ initialBlogs }: { initialBlogs: any[] }) {
             <div key={blog._id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               {blog.imageUrl && (
                 <div className="h-48 overflow-hidden relative">
-                  <img src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
+                  <img src={blog.imageUrl} alt={blog.meta_title} className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
                 </div>
               )}
               <div className="p-6">
@@ -28,7 +28,7 @@ export default function BlogSection({ initialBlogs }: { initialBlogs: any[] }) {
                 </Link>
               </div>
             </div>
-          )) : [1,2,3].map(i => (
+          )) : [1, 2, 3].map(i => (
             <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md p-6">
               <div className="h-4 bg-gray-200 rounded mb-3 animate-pulse" />
               <div className="h-3 bg-gray-100 rounded animate-pulse" />
