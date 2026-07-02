@@ -74,11 +74,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             <div className="blog-hero__bg">
               <img
                 src={blog.imageUrl}
-                alt=""
-                
+                alt={blog.meta_title}
                 className="blog-hero__img w-full h-full object-cover"
                 sizes="100vw"
-                priority
               />
               {/* warm dark gradient so text is always readable */}
               <div className="blog-hero__overlay" />
