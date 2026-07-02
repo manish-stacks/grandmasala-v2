@@ -28,7 +28,7 @@ export default async function BlogsPage() {
               <article key={blog._id} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 {blog.imageUrl && (
                   <div className="h-48 relative overflow-hidden">
-                    <Image src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="33vw" />
+                    <img src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="33vw" />
                   </div>
                 )}
                 <div className="p-6">

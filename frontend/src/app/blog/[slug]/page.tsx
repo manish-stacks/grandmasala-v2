@@ -72,11 +72,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           {/* Background image + overlays */}
           {blog.imageUrl && (
             <div className="blog-hero__bg">
-              <Image
+              <img
                 src={blog.imageUrl}
                 alt=""
-                fill
-                className="blog-hero__img"
+                
+                className="blog-hero__img w-full h-full object-cover"
                 sizes="100vw"
                 priority
               />

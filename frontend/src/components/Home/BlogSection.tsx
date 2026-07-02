@@ -16,7 +16,7 @@ export default function BlogSection({ initialBlogs }: { initialBlogs: any[] }) {
             <div key={blog._id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               {blog.imageUrl && (
                 <div className="h-48 overflow-hidden relative">
-                  <Image src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
+                  <img src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width:768px) 100vw, 33vw" />
                 </div>
               )}
               <div className="p-6">

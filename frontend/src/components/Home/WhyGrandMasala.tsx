@@ -12,11 +12,11 @@ export default function WhyGrandMasala() {
       title: 'Ground only after you order',
       desc: "We don't pre-stock finished masala. The moment your order arrives, we begin processing — so you receive freshly ground spices, never something sitting on a shelf.",
     },
-    {
-      icon: <Thermometer size={22} className="text-[#81190B]" />,
-      title: 'Cold-process grinding',
-      desc: 'High heat kills aroma and colour. We grind at low temperature to preserve the natural oils, fragrance, and nutrients that make spices worth buying.',
-    },
+    // {
+    //   icon: <Thermometer size={22} className="text-[#81190B]" />,
+    //   title: 'Cold-process grinding',
+    //   desc: 'High heat kills aroma and colour. We grind at low temperature to preserve the natural oils, fragrance, and nutrients that make spices worth buying.',
+    // },
     {
       icon: <ClipboardList size={22} className="text-[#81190B]" />,
       title: 'Full ingredient transparency',

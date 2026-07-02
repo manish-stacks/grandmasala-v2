@@ -36,7 +36,7 @@ export default function AdminBlogs() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blogs.map(blog => (
             <div key={blog._id} className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-              {blog.imageUrl && <div className="relative h-40"><Image src={blog.imageUrl} alt={blog.meta_title} fill className="object-cover" sizes="33vw"/></div>}
+              {blog.imageUrl && <div className="relative h-40"><img src={blog.imageUrl} alt={blog.meta_title}  className="object-cover w-full h-full" sizes="33vw"/></div>}
               <div className="p-4">
                 <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{blog.meta_title}</h3>
                 <p className="text-sm text-gray-500 mb-1">/{blog.slug}</p>
