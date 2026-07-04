@@ -37,6 +37,8 @@ export default function ProductDetailClient({ product }: { product: any }) {
   const handleBuyNow = () => { handleAddToCart(); router.push('/cart'); };
 
   const canBuy = !product.isVarient || !!currentVariant;
+  const totalPrice = Number(price) * quantity;
+  const totalOriginalPrice = Number(origPrice) * quantity;
 
   return (
     <div className="min-h-screen bg-white pb-28 lg:pb-24">
@@ -94,15 +96,20 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full"><BadgeCheck size={13} /> Chemical Free</span>
             </div>
 
-            <div className="flex items-center gap-3 pt-1">
-              <span className="text-3xl font-bold text-amber-700">₹{Number(price).toFixed(0)}</span>
-              {origPrice > price && (
-                <>
-                  <span className="text-lg text-gray-400 line-through">₹{origPrice}</span>
-                  <span className="bg-[#81190B] text-white text-xs font-bold px-2 py-1 rounded-full">{disc}% OFF</span>
-                </>
-              )}
-            </div>
+            <span className="text-3xl font-bold text-amber-700">
+              ₹{totalPrice.toFixed(0)}
+            </span>
+
+            {origPrice > price && (
+              <>
+                <span className="text-lg text-gray-400 line-through">
+                  ₹{totalOriginalPrice.toFixed(0)}
+                </span>
+                <span className="bg-[#81190B] text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {disc}% OFF
+                </span>
+              </>
+            )}
 
             {product.isVarient && product.Varient?.length > 0 && (
               <div>
@@ -141,7 +148,7 @@ export default function ProductDetailClient({ product }: { product: any }) {
 
             {/* Trust icon grid — Bilona-style 4-up row from the reference, reworded for spices */}
             <div className="grid grid-cols-1 pt-5 w-full">
-             <img src="/images/trust-icon.png" alt="Trust Icon" className="w-full" />
+              <img src="/images/trust-icon.png" alt="Trust Icon" className="w-full" />
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-[#E8DCCB] text-sm text-gray-600">
@@ -175,8 +182,15 @@ export default function ProductDetailClient({ product }: { product: any }) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate hidden sm:block">{product.product_name}</p>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-amber-700">₹{Number(price).toFixed(0)}</span>
-              {origPrice > price && <span className="text-sm text-gray-400 line-through">₹{origPrice}</span>}
+              <span className="text-lg font-bold text-amber-700">
+                ₹{totalPrice.toFixed(0)}
+              </span>
+
+              {origPrice > price && (
+                <span className="text-sm text-gray-400 line-through">
+                  ₹{totalOriginalPrice.toFixed(0)}
+                </span>
+              )}
             </div>
           </div>
           <button onClick={handleAddToCart} disabled={!canBuy}
