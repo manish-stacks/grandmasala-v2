@@ -8,14 +8,24 @@ import {
   Upload,
   X,
   RefreshCw,
+  GripVertical,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { use } from "react";
-import Image from "next/image";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
+
+type ImageItem = {
+  id: string;
+  type: "existing" | "new";
+  url: string; // preview URL (cloudinary url OR base64 data url)
+  public_id?: string; // only for existing images
+  file?: File; // only for new images
+};
+
+const MAX_IMAGES = 5;
 
 export default function EditProduct({
   params,
@@ -31,10 +41,15 @@ export default function EditProduct({
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [newImages, setNewImages] = useState<File[]>([]);
-  const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [form, setForm] = useState<any>({});
+
+  // ── Unified image state (existing + new, in display/save order) ──
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const originalPublicIdsRef = useRef<string[]>([]); // to compute removedImages on save
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   // ── Load product ──────────────────────────────────────────
   useEffect(() => {
@@ -46,11 +61,9 @@ export default function EditProduct({
       }).then((r) => r.json()),
     ])
       .then(([prodData, catData]) => {
-        console.log("prodData", prodData);
         const p = prodData.data;
         if (!p) {
           toast.error("Product not found");
-          // router.push("/admin/products");
           return;
         }
         setProduct(p);
@@ -84,6 +97,27 @@ export default function EditProduct({
                 },
               ],
         );
+
+        // Build initial unified images array from the 5 fixed slots
+        const slots = [
+          p.ProductMainImage,
+          p.SecondImage,
+          p.ThirdImage,
+          p.FourthImage,
+          p.FifthImage,
+        ].filter((img) => img?.url);
+
+        const initialImages: ImageItem[] = slots.map((img: any) => ({
+          id: img.public_id,
+          type: "existing",
+          url: img.url,
+          public_id: img.public_id,
+        }));
+
+        setImages(initialImages);
+        originalPublicIdsRef.current = initialImages.map(
+          (img) => img.public_id as string,
+        );
       })
       .catch(() => toast.error("Failed to load product"))
       .finally(() => setLoading(false));
@@ -104,17 +138,61 @@ export default function EditProduct({
   // ── Image handling ────────────────────────────────────────
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
+    if (images.length + files.length > MAX_IMAGES) {
+      toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+      return;
+    }
     Array.from(files).forEach((f) => {
-      setNewImages((p) => [...p, f]);
+      const id = `new-${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const reader = new FileReader();
-      reader.onload = (e) =>
-        setNewPreviews((p) => [...p, e.target?.result as string]);
+      reader.onload = (e) => {
+        setImages((prev) => [
+          ...prev,
+          {
+            id,
+            type: "new",
+            url: e.target?.result as string,
+            file: f,
+          },
+        ]);
+      };
       reader.readAsDataURL(f);
     });
   };
-  const removeNewImage = (i: number) => {
-    setNewImages((p) => p.filter((_, j) => j !== i));
-    setNewPreviews((p) => p.filter((_, j) => j !== i));
+
+  const removeImage = (imgId: string) => {
+    setImages((prev) => prev.filter((img) => img.id !== imgId));
+  };
+  const handlePointerDown = (i: number) => (e: React.PointerEvent) => {
+    setDraggedIndex(i);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (draggedIndex === null) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const card = el?.closest("[data-drag-index]") as HTMLElement | null;
+    if (card) {
+      const idx = Number(card.dataset.dragIndex);
+      if (!Number.isNaN(idx) && idx !== hoverIndex) setHoverIndex(idx);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (
+      draggedIndex !== null &&
+      hoverIndex !== null &&
+      draggedIndex !== hoverIndex
+    ) {
+      setImages((prev) => {
+        const next = [...prev];
+        const [moved] = next.splice(draggedIndex, 1);
+        next.splice(hoverIndex, 0, moved);
+        return next;
+      });
+    }
+    setDraggedIndex(null);
+    setHoverIndex(null);
   };
 
   // ── Variant helpers ───────────────────────────────────────
@@ -122,7 +200,6 @@ export default function EditProduct({
     setVariants((prev) => {
       const next = [...prev];
       next[i] = { ...next[i], [key]: val };
-      // Auto-calculate price after discount
       if ((key === "price" || key === "discount_percentage") && next[i].price) {
         const p = parseFloat(next[i].price) || 0;
         const d = parseFloat(next[i].discount_percentage) || 0;
@@ -160,21 +237,48 @@ export default function EditProduct({
       toast.error("Fill all variant fields");
       return;
     }
+    if (images.length === 0) {
+      toast.error("At least one product image is required");
+      return;
+    }
 
     setSaving(true);
     const token = sessionStorage.getItem("admin_token");
     try {
       const fd = new FormData();
-      newImages.forEach((img) => fd.append("images", img));
-      // Append form fields
+
       Object.entries(form).forEach(([k, v]) => {
         if (v !== undefined && v !== null) fd.append(k, String(v));
       });
       fd.set("Varient", JSON.stringify(variants));
 
+      // Describe the final image order — backend uses this to rebuild
+      // ProductMainImage..FifthImage in the exact order shown here.
+      const imageOrder = images.map((img) =>
+        img.type === "existing"
+          ? { type: "existing", public_id: img.public_id, url: img.url }
+          : { type: "new" },
+      );
+      fd.append("imageOrder", JSON.stringify(imageOrder));
+
+      // Existing images that were removed by the user — backend can
+      // clean these up from Cloudinary.
+      const keptExistingIds = images
+        .filter((img) => img.type === "existing")
+        .map((img) => img.public_id);
+      const removedImages = originalPublicIdsRef.current.filter(
+        (pid) => !keptExistingIds.includes(pid),
+      );
+      fd.append("removedImages", JSON.stringify(removedImages));
+
+      // New files, appended in the same order they appear in imageOrder
+      images
+        .filter((img) => img.type === "new")
+        .forEach((img) => fd.append("images", img.file as File));
+
       const res = await fetch(`${API}/update-product/${id}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` }, // No Content-Type — multipart
+        headers: { Authorization: `Bearer ${token}` },
         body: fd,
       });
       const data = await res.json();
@@ -210,13 +314,6 @@ export default function EditProduct({
       </div>
     );
 
-  const existingImages = [
-    product.ProductMainImage,
-    product.SecondImage,
-    product.ThirdImage,
-    product.FourthImage,
-    product.FifthImage,
-  ].filter((img) => img?.url);
   const inputClass =
     "w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#81190B] text-sm transition-colors";
 
@@ -237,7 +334,7 @@ export default function EditProduct({
       </div>
 
       <form onSubmit={handleSave} className="max-w-5xl space-y-5">
-        {/* Basic Info */}
+        {/* Basic Info — unchanged, omitted here for brevity, keep as-is */}
         <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
           <h2 className="font-bold text-gray-900 border-b pb-2">
             Basic Information
@@ -365,90 +462,91 @@ export default function EditProduct({
           </label>
         </div>
 
-        {/* Images */}
+        {/* Images — unified, drag to reorder, first = Main */}
         <div className="bg-white rounded-2xl shadow-sm p-6">
-          <h2 className="font-bold text-gray-900 border-b pb-2 mb-4">
-            Product Images
-          </h2>
-
-          {/* Existing images */}
-          {existingImages.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
-                Current Images
-              </p>
-              <div className="flex gap-3 flex-wrap">
-                {existingImages.map((img: any, i: number) => (
-                  <div
-                    key={i}
-                    className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 ${i === 0 ? "border-amber-400" : "border-gray-200"}`}
-                  >
-                    <Image
-                      src={img.url}
-                      alt=""
-                      fill
-                      className="object-cover"
-                      sizes="80px"
-                    />
-                    {i === 0 && (
-                      <span className="absolute bottom-0 left-0 right-0 text-[9px] font-bold bg-amber-400 text-white text-center py-0.5">
-                        MAIN
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Upload new */}
-          <div
-            onClick={() => fileRef.current?.click()}
-            className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#81190B] transition-colors"
-          >
-            <Upload size={24} className="text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500 font-medium">
-              Click to add new images
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              New images will be appended to existing ones
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-            />
+          <div className="flex items-center justify-between border-b pb-2 mb-4">
+            <h2 className="font-bold text-gray-900">Product Images</h2>
+            <span className="text-xs text-gray-400">
+              Drag to reorder · first image is the Main Image
+            </span>
           </div>
 
-          {newPreviews.length > 0 && (
-            <div className="flex gap-3 mt-3 flex-wrap">
-              {newPreviews.map((src, i) => (
+          {images.length > 0 && (
+            <div className="flex gap-3 flex-wrap mb-4">
+              {images.map((img, i) => (
                 <div
-                  key={i}
-                  className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-green-300 group"
+                  key={img.id}
+                  data-drag-index={i}
+                  onPointerDown={handlePointerDown(i)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                  style={{ touchAction: "none" }} // stops mobile scroll from hijacking the drag
+                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 cursor-move group select-none transition-all ${
+                    i === 0 ? "border-amber-400" : "border-gray-200"
+                  } ${draggedIndex === i ? "opacity-40 scale-95" : ""} ${
+                    hoverIndex === i &&
+                    draggedIndex !== null &&
+                    draggedIndex !== i
+                      ? "ring-2 ring-[#81190B] ring-offset-1"
+                      : ""
+                  }`}
                 >
                   <img
-                    src={src}
+                    src={img.url}
                     alt=""
-                    className="w-full h-full object-cover"
+                    draggable={false}
+                    className="w-full h-full object-cover pointer-events-none"
                   />
+
+                  {i === 0 && (
+                    <span className="absolute bottom-0 left-0 right-0 text-[9px] font-bold bg-amber-400 text-white text-center py-0.5 pointer-events-none">
+                      MAIN
+                    </span>
+                  )}
+
+                  <div className="absolute top-1 left-1 p-0.5 rounded bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <GripVertical size={12} />
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => removeNewImage(i)}
-                    className="absolute inset-0 bg-red-500/70 text-white hidden group-hover:flex items-center justify-center"
+                    onPointerDown={(e) => e.stopPropagation()} // so clicking X doesn't start a drag
+                    onClick={() => removeImage(img.id)}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
                   >
-                    <X size={16} />
+                    <X size={12} />
                   </button>
                 </div>
               ))}
             </div>
           )}
+
+          {images.length < MAX_IMAGES && (
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center cursor-pointer hover:border-[#81190B] transition-colors"
+            >
+              <Upload size={24} className="text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500 font-medium">
+                Click to add new images
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {MAX_IMAGES - images.length} slot(s) remaining
+              </p>
+              <input
+                ref={fileRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Pricing & Variants */}
+        {/* Pricing & Variants — unchanged */}
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex items-center justify-between border-b pb-2 mb-4">
             <h2 className="font-bold text-gray-900">Pricing & Variants</h2>

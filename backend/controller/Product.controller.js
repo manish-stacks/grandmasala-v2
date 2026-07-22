@@ -351,17 +351,14 @@ exports.updateProduct = async (req, res) => {
             extra_description,
             tag,
             isShowOnHomeScreen,
-            color // 👈 color field
+            color,
+            imageOrder,     // 👈 NEW — final ordered image sequence
+            removedImages,  // 👈 NEW — public_ids to delete from Cloudinary
         } = req.body;
 
-        // console.log("Update request body:", req.body);
-        // Handle basic field updates
         if (product_name !== undefined) updateFields.product_name = product_name;
         if (product_description !== undefined) updateFields.product_description = product_description;
 
-        // Backfill a slug for legacy products that don't have one yet. We
-        // deliberately never overwrite an existing slug here, since changing
-        // it on every name edit would silently break already-shared/SEO'd URLs.
         if (product_name !== undefined) {
             const existingProduct = await ProductModel.findById(productId).select('slug').lean();
             if (existingProduct && !existingProduct.slug) {
@@ -380,31 +377,23 @@ exports.updateProduct = async (req, res) => {
             updateFields.sub_category = sub_category && sub_category !== '' ? sub_category : null;
         }
 
-        // ✅ Handle color parsing - consistent with create controller
         if (color !== undefined) {
             if (typeof color === "string") {
-                // Handle comma-separated string from frontend
                 updateFields.color = color.split(',').map(c => c.trim()).filter(Boolean);
             } else if (Array.isArray(color)) {
-                // Handle if it's already an array
                 updateFields.color = color;
             } else {
-                // Default to empty array for other cases
                 updateFields.color = [];
             }
-            console.log("Parsed colors:", updateFields.color);
         }
 
-        // Handle variant updates
         if (isVarient !== undefined) {
             updateFields.isVarient = JSON.parse(isVarient);
         }
 
         if (Varient !== undefined) {
             let parsedVarients = JSON.parse(Varient || "[]");
-
             parsedVarients = parsedVarients.map(variant => {
-                // Recalculate price after discount if price or discount changed
                 if (!variant.price_after_discount || variant.price_after_discount === '') {
                     const price = parseFloat(variant.price) || 0;
                     const discountPercentage = parseFloat(variant.discount_percentage) || 0;
@@ -413,7 +402,6 @@ exports.updateProduct = async (req, res) => {
                 }
                 return variant;
             });
-
             updateFields.Varient = parsedVarients;
         }
 
@@ -421,44 +409,80 @@ exports.updateProduct = async (req, res) => {
             updateFields.isShowOnHomeScreen = JSON.parse(isShowOnHomeScreen);
         }
 
-        // ✅ Handle file uploads
-        if (req.files && req.files.length > 0) {
-            console.log("Processing file uploads:", req.files.length);
+        // ✅ NEW: ordered image handling (reorder / set-main / remove)
+        if (imageOrder !== undefined) {
+            const order = JSON.parse(imageOrder || "[]");
+            const slotNames = ["ProductMainImage", "SecondImage", "ThirdImage", "FourthImage", "FifthImage"];
 
+            if (order.length > slotNames.length) {
+                return res.status(400).json({
+                    success: false,
+                    message: `A product can have at most ${slotNames.length} images`,
+                });
+            }
+            if (order.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "At least one product image is required",
+                });
+            }
+
+            // New files were appended under the "images" field, in order
+            const newFiles = (req.files || []).filter(f => f.fieldname === "images");
+            let newFileIndex = 0;
+
+            const resolvedImages = [];
+            for (const entry of order) {
+                if (entry.type === "existing" && entry.public_id && entry.url) {
+                    resolvedImages.push({ public_id: entry.public_id, url: entry.url });
+                } else if (entry.type === "new") {
+                    const file = newFiles[newFileIndex++];
+                    if (!file) continue; // safety guard, shouldn't happen if frontend is consistent
+                    const result = await uploadBufferToCloudinary(file.buffer, file.originalname);
+                    resolvedImages.push({ public_id: result.public_id, url: result.secure_url });
+                }
+            }
+
+            // Assign to fixed slots — clears any slot beyond the new count
+            slotNames.forEach((slot, i) => {
+                updateFields[slot] = resolvedImages[i] || null;
+            });
+
+            // Best-effort cleanup of removed images from Cloudinary
+            if (removedImages) {
+                try {
+                    const idsToDelete = JSON.parse(removedImages || "[]");
+                    await Promise.all(
+                        idsToDelete.map((publicId) =>
+                            cloudinary.uploader.destroy(publicId).catch((err) =>
+                                console.error("Cloudinary delete failed for", publicId, err.message)
+                            )
+                        )
+                    );
+                } catch (err) {
+                    console.error("Failed to parse/delete removedImages:", err.message);
+                }
+            }
+        } else if (req.files && req.files.length > 0) {
+            // Legacy path (kept for backward compatibility): files uploaded
+            // under named fields like ProductMainImage, SecondImage, etc.
             for (const file of req.files) {
                 const result = await uploadBufferToCloudinary(file.buffer, file.originalname);
-                console.log(`Uploaded ${file.fieldname}:`, result.secure_url);
-
                 switch (file.fieldname) {
                     case "ProductMainImage":
-                        updateFields.ProductMainImage = {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        };
+                        updateFields.ProductMainImage = { public_id: result.public_id, url: result.secure_url };
                         break;
                     case "SecondImage":
-                        updateFields.SecondImage = {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        };
+                        updateFields.SecondImage = { public_id: result.public_id, url: result.secure_url };
                         break;
                     case "ThirdImage":
-                        updateFields.ThirdImage = {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        };
+                        updateFields.ThirdImage = { public_id: result.public_id, url: result.secure_url };
                         break;
                     case "FourthImage":
-                        updateFields.FourthImage = {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        };
+                        updateFields.FourthImage = { public_id: result.public_id, url: result.secure_url };
                         break;
                     case "FifthImage":
-                        updateFields.FifthImage = {
-                            public_id: result.public_id,
-                            url: result.secure_url,
-                        };
+                        updateFields.FifthImage = { public_id: result.public_id, url: result.secure_url };
                         break;
                     default:
                         console.log("Unknown file field:", file.fieldname);
@@ -466,8 +490,6 @@ exports.updateProduct = async (req, res) => {
                 }
             }
         }
-
-        console.log("Update fields:", updateFields);
 
         const updatedProduct = await ProductModel.findByIdAndUpdate(
             productId,
@@ -481,8 +503,6 @@ exports.updateProduct = async (req, res) => {
                 message: "Product not found",
             });
         }
-
-        console.log("Product updated successfully:", updatedProduct._id);
 
         res.status(200).json({
             success: true,
