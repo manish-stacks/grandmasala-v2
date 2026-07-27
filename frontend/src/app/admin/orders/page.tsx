@@ -62,20 +62,22 @@ export default function AdminOrders() {
         {loading ? <div className="p-8 text-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#81190B] mx-auto"/></div> : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50"><tr>{['Order ID','Customer','Amount','Payment','Status','Change Status','Action'].map(h=><th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
+              <thead className="bg-gray-50"><tr>{['Order ID','Customer Name', 'Customer Number','Amount','Payment','Status','Action'].map(h=><th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">{h}</th>)}</tr></thead>
               <tbody className="divide-y divide-gray-100">
                 {filtered.map(o => (
                   <tr key={o._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{o.orderId}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{o.userId?.Name || o.userId?.Email || 'Guest'}</td>
+                    {/* <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{o.userId?.Name || o.shipping?.name || '-'}</td> */}
+                    <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{o.userId?.Name === 'Guest' ? o.shipping?.name : o.userId?.Name ||  '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{o.userId?.ContactNumber || o.shipping?.mobileNumber || '-'}</td>
                     <td className="px-4 py-3 text-sm font-semibold">₹{o.payAmt?.toFixed(0)}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${o.paymentType==='ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>{o.paymentType}</span></td>
                     <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColor(o.status)}`}>{o.status}</span></td>
-                    <td className="px-4 py-3">
+                    {/* <td className="px-4 py-3">
                       <select value={o.status} onChange={e => handleStatusChange(o._id, e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-[#81190B]">
                         {statuses.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
                       </select>
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3"><Link href={`/admin/orders/${o.orderId}`} className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 inline-flex"><Eye size={16}/></Link></td>
                   </tr>
                 ))}

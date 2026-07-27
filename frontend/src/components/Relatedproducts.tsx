@@ -18,10 +18,7 @@ const seededRandom = (seed: string) => {
 
 export default function RelatedProducts({ products }: { products: any[] }) {
   const dispatch = useAppDispatch();
-  const [selectedVariants, setSelectedVariants] = useState<
-    Record<string, string>
-  >({});
-  // State add karo
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
 
   const getVariant = (product: any) => {
@@ -33,6 +30,15 @@ export default function RelatedProducts({ products }: { products: any[] }) {
 
   const handleAddToCart = (product: any) => {
     const variant = getVariant(product);
+    const outOfStock = product.isVarient
+      ? (variant?.stock_quantity ?? 0) <= 0
+      : (product.stock ?? 0) <= 0;
+
+    if (outOfStock) {
+      toast.error("This item is out of stock");
+      return;
+    }
+
     const price = variant
       ? variant.price_after_discount
       : product.afterDiscountPrice || product.price;
@@ -69,7 +75,7 @@ export default function RelatedProducts({ products }: { products: any[] }) {
           </p>
         </div>
 
-        {/* Cards — same as FeaturedProducts */}
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => {
             const variant = getVariant(product);
@@ -80,6 +86,9 @@ export default function RelatedProducts({ products }: { products: any[] }) {
             const rating = (seededRandom(product._id + "rating") % 2) + 4;
             const reviews = (seededRandom(product._id + "reviews") % 451) + 50;
             const disc = variant?.discount_percentage || product.discount || 0;
+            const isOutOfStock = product.isVarient
+              ? (variant?.stock_quantity ?? 0) <= 0
+              : (product.stock ?? 0) <= 0;
 
             return (
               <div
@@ -119,7 +128,7 @@ export default function RelatedProducts({ products }: { products: any[] }) {
                           }`}
                         />
 
-                        {/* Hover Image — sirf tab dikhega jab dusri image ho */}
+                        {/* Hover Image */}
                         {product.SecondImage?.url && (
                           <Image
                             src={product.SecondImage.url}
@@ -141,6 +150,15 @@ export default function RelatedProducts({ products }: { products: any[] }) {
 
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+
+                    {/* Out of Stock Overlay */}
+                    {isOutOfStock && (
+                      <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
+                        <span className="bg-white text-[#81190B] px-4 py-1.5 rounded-full text-sm font-bold">
+                          Out of Stock
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </Link>
 
@@ -184,8 +202,13 @@ export default function RelatedProducts({ products }: { products: any[] }) {
                       className="w-full mt-3 rounded-xl border border-[#E8DCCB] bg-[#FFF9F3] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#81190B]"
                     >
                       {product.Varient.map((v: any) => (
-                        <option key={v._id} value={v._id}>
+                        <option
+                          key={v._id}
+                          value={v._id}
+                          disabled={(v.stock_quantity ?? 0) <= 0}
+                        >
                           {v.quantity} - ₹{v.price_after_discount}
+                          {(v.stock_quantity ?? 0) <= 0 ? " (Out of Stock)" : ""}
                         </option>
                       ))}
                     </select>
@@ -211,10 +234,15 @@ export default function RelatedProducts({ products }: { products: any[] }) {
                   {/* Add To Cart */}
                   <button
                     onClick={() => handleAddToCart(product)}
-                    className="mt-5 w-full flex items-center justify-center gap-2 bg-[#81190B] hover:bg-[#651307] text-white py-3 rounded-2xl font-semibold transition-all duration-300"
+                    disabled={isOutOfStock}
+                    className={`mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold transition-all duration-300 ${
+                      isOutOfStock
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-[#81190B] hover:bg-[#651307] text-white"
+                    }`}
                   >
                     <ShoppingCart size={18} />
-                    Add To Cart
+                    {isOutOfStock ? "Out of Stock" : "Add To Cart"}
                   </button>
                 </div>
               </div>

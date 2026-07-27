@@ -28,15 +28,20 @@ export default function ProductDetailClient({ product }: { product: any }) {
   const origPrice = currentVariant?.price || product.price;
   const disc = currentVariant?.discount_percentage || product.discount || 0;
 
+  const isOutOfStock = product.isVarient
+    ? (currentVariant?.stock_quantity ?? 0) <= 0
+    : (product.stock ?? 0) <= 0;
+
   const handleAddToCart = () => {
     if (product.isVarient && !currentVariant) { toast.error('Please select a variant'); return; }
+    if (isOutOfStock) { toast.error('This item is out of stock'); return; }
     dispatch(addToCart({ product: product._id, product_name: product.product_name, price: Number(price), quantity, image: images[0], variantId: currentVariant?._id, size: currentVariant?.quantity }));
     toast.success(`${product.product_name} added to cart! 🛒`);
   };
 
   const handleBuyNow = () => { handleAddToCart(); router.push('/cart'); };
 
-  const canBuy = !product.isVarient || !!currentVariant;
+  const canBuy = (!product.isVarient || !!currentVariant) && !isOutOfStock;
   const totalPrice = Number(price) * quantity;
   const totalOriginalPrice = Number(origPrice) * quantity;
 
@@ -66,6 +71,11 @@ export default function ProductDetailClient({ product }: { product: any }) {
                   <button onClick={() => setSelectedImage(p => Math.min(images.length - 1, p + 1))} className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 bg-white/80 rounded-full shadow hover:bg-white"><ChevronRight size={18} /></button>
                 </>
               )}
+              {isOutOfStock && (
+                <div className="absolute inset-0 z-20 bg-black/50 flex items-center justify-center">
+                  <span className="bg-white text-[#81190B] px-5 py-2 rounded-full text-base font-bold">Out of Stock</span>
+                </div>
+              )}
             </div>
             {images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-1 mt-4">
@@ -82,7 +92,6 @@ export default function ProductDetailClient({ product }: { product: any }) {
           <div className="space-y-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug">{product.product_name}</h1>
 
-            {/* Hindi tagline — swap per-product copy here if you want something more specific */}
             <p className="text-amber-700 text-sm">शुद्ध भारतीय मसाले का स्वाद</p>
 
             <div className="flex items-center gap-2">
@@ -94,6 +103,9 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full"><BadgeCheck size={13} /> Lab Tested</span>
               <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full"><BadgeCheck size={13} /> 100% Natural</span>
               <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full"><BadgeCheck size={13} /> Chemical Free</span>
+              {isOutOfStock && (
+                <span className="flex items-center gap-1 text-xs font-bold text-red-700 bg-red-50 px-3 py-1.5 rounded-full">Out of Stock</span>
+              )}
             </div>
 
             <span className="text-3xl font-bold text-amber-700">
@@ -115,12 +127,25 @@ export default function ProductDetailClient({ product }: { product: any }) {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Size</h3>
                 <div className="flex flex-wrap gap-2">
-                  {product.Varient.map((v: any, i: number) => (
-                    <button key={v._id} onClick={() => setSelectedVariant(i)}
-                      className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${selectedVariant === i ? 'bg-[#81190B] text-white' : 'bg-amber-500 text-white hover:bg-amber-600'}`}>
-                      {v.quantity}
-                    </button>
-                  ))}
+                  {product.Varient.map((v: any, i: number) => {
+                    const oos = (v.stock_quantity ?? 0) <= 0;
+                    return (
+                      <button
+                        key={v._id}
+                        onClick={() => setSelectedVariant(i)}
+                        disabled={oos}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                          oos
+                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed line-through'
+                            : selectedVariant === i
+                            ? 'bg-[#81190B] text-white'
+                            : 'bg-amber-500 text-white hover:bg-amber-600'
+                        }`}
+                      >
+                        {v.quantity}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -134,19 +159,18 @@ export default function ProductDetailClient({ product }: { product: any }) {
               </div>
             </div>
 
-            {/* CTAs — brand colors: maroon outline for Add to Cart, amber fill for Buy Now */}
+            {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button onClick={handleAddToCart} disabled={!canBuy}
-                className="flex-1 bg-[#81190B] hover:bg-[#5a1008] text-white font-semibold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                <ShoppingCart size={18} /> Add to Cart
+                className="flex-1 bg-[#81190B] hover:bg-[#5a1008] text-white font-semibold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <ShoppingCart size={18} /> {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
               </button>
               <button onClick={handleBuyNow} disabled={!canBuy}
-                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                Buy Now
+                className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
               </button>
             </div>
 
-            {/* Trust icon grid — Bilona-style 4-up row from the reference, reworded for spices */}
             <div className="grid grid-cols-1 pt-5 w-full">
               <img src="/images/trust-icon.png" alt="Trust Icon" className="w-full" />
             </div>
@@ -170,10 +194,10 @@ export default function ProductDetailClient({ product }: { product: any }) {
         )}
       </div>
 
-      {/* Static marketing sections: process, comparisons, benefits, reviews, FAQ */}
+      {/* Static marketing sections */}
       <ProductStaticSections productId={product._id} />
 
-      {/* Sticky buy bar — mobile + desktop */}
+      {/* Sticky buy bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E8DCCB] shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="hidden sm:block flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-[#F4F1EA] relative">
@@ -194,13 +218,13 @@ export default function ProductDetailClient({ product }: { product: any }) {
             </div>
           </div>
           <button onClick={handleAddToCart} disabled={!canBuy}
-            className="flex items-center justify-center gap-2 border-2 border-[#81190B] text-[#81190B] font-semibold py-2.5 px-4 rounded-xl transition-colors disabled:opacity-50 hover:bg-red-50">
+            className="flex items-center justify-center gap-2 border-2 border-[#81190B] text-[#81190B] font-semibold py-2.5 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-50">
             <ShoppingCart size={16} />
-            <span className="hidden sm:inline">Add to Cart</span>
+            <span className="hidden sm:inline">{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</span>
           </button>
           <button onClick={handleBuyNow} disabled={!canBuy}
-            className="flex-shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors disabled:opacity-50">
-            Buy Now
+            className="flex-shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
           </button>
         </div>
       </div>

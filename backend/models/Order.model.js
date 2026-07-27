@@ -142,7 +142,6 @@ const orderSchema = new Schema(
       courier_name: String,
       status: String,
     }
-
   },
   { timestamps: true }
 );

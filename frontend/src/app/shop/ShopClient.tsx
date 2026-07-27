@@ -20,7 +20,7 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
   const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
   const [priceRange, setPriceRange] = useState('all');
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null); // ✅ hover state
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
 
   const categories = ['All', ...initialCategories.map((c: any) => c.name)];
 
@@ -44,6 +44,15 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
   const handleAddToCart = (product: any) => {
     const vid = selectedVariants[product._id];
     const variant = product.Varient?.find((v: any) => v._id === vid) || product.Varient?.[0];
+    const outOfStock = product.isVarient
+      ? (variant?.stock_quantity ?? 0) <= 0
+      : (product.stock ?? 0) <= 0;
+
+    if (outOfStock) {
+      toast.error('This item is out of stock');
+      return;
+    }
+
     const price = variant?.price_after_discount || product.afterDiscountPrice || product.price;
     dispatch(addToCart({ product: product._id, product_name: product.product_name, price: Number(price), quantity: 1, image: product.ProductMainImage?.url, variantId: variant?._id, size: variant?.quantity }));
     toast.success(`${product.product_name} added to cart! 🛒`);
@@ -104,13 +113,19 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
               const rating = (seededRandom(product._id + 'r') % 2) + 4;
               const reviews = (seededRandom(product._id + 'rv') % 451) + 50;
               const disc = variant?.discount_percentage || product.discount || 0;
+              const isOutOfStock = product.isVarient
+                ? (variant?.stock_quantity ?? 0) <= 0
+                : (product.stock ?? 0) <= 0;
 
               if (viewMode === 'list') return (
                 <div key={product._id} className="bg-white rounded-2xl shadow-sm p-4 flex gap-4 items-center hover:shadow-md transition-shadow">
-                  <Link href={`/product/${product.slug || product._id}`} className="flex-shrink-0">
+                  <Link href={`/product/${product.slug || product._id}`} className="flex-shrink-0 relative">
                     {product.ProductMainImage?.url
                       ? <Image src={product.ProductMainImage.url} alt={product.product_name} width={100} height={100} className="rounded-xl object-cover w-24 h-24" />
                       : <div className="w-24 h-24 bg-[#F4F1EA] rounded-xl flex items-center justify-center text-3xl">🌶</div>}
+                    {isOutOfStock && (
+                      <span className="absolute top-1 left-1 bg-gray-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full z-10">Out of Stock</span>
+                    )}
                   </Link>
                   <div className="flex-1">
                     <Link href={`/product/${product.slug || product._id}`}><h3 className="font-bold text-gray-900 hover:text-[#81190B]">{product.product_name}</h3></Link>
@@ -120,7 +135,15 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                   <div className="text-right flex-shrink-0">
                     <p className="text-xl font-bold text-[#81190B]">₹{Number(price).toFixed(0)}</p>
                     {origPrice > price && <p className="text-sm text-gray-400 line-through">₹{origPrice}</p>}
-                    <button onClick={() => handleAddToCart(product)} className="mt-2 bg-[#81190B] text-white px-4 py-2 rounded-xl text-sm hover:bg-[#5a1008] transition-colors flex items-center gap-1"><ShoppingCart size={14}/>Add to Cart</button>
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      disabled={isOutOfStock}
+                      className={`mt-2 px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-1 ${
+                        isOutOfStock ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#81190B] text-white hover:bg-[#5a1008]'
+                      }`}
+                    >
+                      <ShoppingCart size={14}/>{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
                   </div>
                 </div>
               );
@@ -128,7 +151,6 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
               return (
                 <div key={product._id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
                   <Link href={`/product/${product.slug || product._id}`}>
-                    {/* ✅ hover state + no zoom */}
                     <div
                       className="relative h-90 overflow-hidden bg-white"
                       onMouseEnter={() => setHoveredProduct(product._id)}
@@ -136,7 +158,6 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                     >
                       {product.ProductMainImage?.url ? (
                         <>
-                          {/* Main Image — no zoom */}
                           <Image
                             src={product.ProductMainImage.url}
                             alt={product.product_name}
@@ -148,8 +169,6 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                             }`}
                             sizes="25vw"
                           />
-
-                          {/* Hover Image — SecondImage */}
                           {product.SecondImage?.url && (
                             <Image
                               src={product.SecondImage.url}
@@ -173,6 +192,12 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                           {disc}% OFF
                         </span>
                       )}
+
+                      {isOutOfStock && (
+                        <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center rounded-t-2xl">
+                          <span className="bg-white text-[#81190B] px-3 py-1 rounded-full text-xs font-bold">Out of Stock</span>
+                        </div>
+                      )}
                     </div>
                   </Link>
 
@@ -184,7 +209,11 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                       <div className="relative mb-3">
                         <select value={vid || product.Varient[0]?._id} onChange={e => setSelectedVariants(p => ({...p,[product._id]:e.target.value}))}
                           className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#81190B] appearance-none">
-                          {product.Varient.map((v: any) => <option key={v._id} value={v._id}>Size {v.quantity} – ₹{v.price_after_discount}{v.discount_percentage > 0 ? ` (${v.discount_percentage}% off)` : ''}</option>)}
+                          {product.Varient.map((v: any) => (
+                            <option key={v._id} value={v._id} disabled={(v.stock_quantity ?? 0) <= 0}>
+                              Size {v.quantity} – ₹{v.price_after_discount}{v.discount_percentage > 0 ? ` (${v.discount_percentage}% off)` : ''}{(v.stock_quantity ?? 0) <= 0 ? ' (Out of Stock)' : ''}
+                            </option>
+                          ))}
                         </select>
                         <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" />
                       </div>
@@ -194,7 +223,15 @@ export default function ShopClient({ initialProducts, initialCategories }: { ini
                         <span className="text-lg font-bold text-gray-900">₹{Number(price).toFixed(0)}</span>
                         {origPrice > price && <span className="text-sm text-gray-400 line-through ml-1">₹{origPrice}</span>}
                       </div>
-                      <button onClick={() => handleAddToCart(product)} className="bg-[#81190B] text-white p-2 rounded-xl hover:bg-[#5a1008] transition-colors"><ShoppingCart size={16}/></button>
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        disabled={isOutOfStock}
+                        className={`p-2 rounded-xl transition-colors ${
+                          isOutOfStock ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#81190B] text-white hover:bg-[#5a1008]'
+                        }`}
+                      >
+                        <ShoppingCart size={16}/>
+                      </button>
                     </div>
                   </div>
                 </div>
