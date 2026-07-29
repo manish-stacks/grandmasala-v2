@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]); // 👈 naya
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const API = process.env.NEXT_PUBLIC_API_URL;
@@ -13,12 +14,18 @@ export default function AdminUsers() {
     setLoading(true);
     try {
       const token = sessionStorage.getItem("admin_token");
-      const res = await fetch(`${API}/admin/get-users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const d = await res.json();
-      console.log("d",d)
+      const [usersRes, ordersRes] = await Promise.all([
+        fetch(`${API}/admin/get-users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API}/admin/get-all-order`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+      const d = await usersRes.json();
+      const o = await ordersRes.json();
       setUsers(d.data || []);
+      setOrders(o.data || []);
     } catch {
     } finally {
       setLoading(false);
@@ -27,6 +34,12 @@ export default function AdminUsers() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const getDisplayName = (u: any) => {
+    if (u.Name && u.Name !== "Guest") return u.Name;
+    const userOrder = orders.find((o) => o.userId?._id === u._id);
+    return userOrder?.shipping?.name || "Guest";
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this user?")) return;
@@ -103,7 +116,7 @@ export default function AdminUsers() {
                 {filtered.map((u) => (
                   <tr key={u._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      {u.Name || "—"}
+                      {getDisplayName(u)}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {u.Email}
