@@ -111,7 +111,7 @@ export default function AdminDashboard() {
                 recentOrders.slice(0, 10).map((order: any) => (
                   <tr key={order._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 text-sm font-mono font-bold text-gray-900">{order.orderId}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{order.userId?.Name || order.userId?.Email || 'Guest'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">{order.userId?.Name === 'Guest' ? order.shipping?.name : order.userId?.Name ||  '-'}</td>
                     <td className="px-4 py-3 text-sm text-gray-500">{order.items?.length || 0} items</td>
                     <td className="px-4 py-3 text-sm font-bold text-[#81190B]">₹{order.payAmt?.toFixed(0)}</td>
                     <td className="px-4 py-3">
